@@ -1,0 +1,21 @@
+{
+  "name": "fakeminder",
+  "version": "0.0.1",
+  "description": "Fake implementation of CA SiteMinder to use for developer testing",
+  "main": "fakeminder.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrisneave/fakeminder.git"
+  },
+  "keywords": [
+    "siteminder"
+  ],
+  "author": "Chris Neave",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/chrisneave/fakeminder/issues"
+  }
+}
