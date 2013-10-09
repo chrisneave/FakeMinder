@@ -1,0 +1,28 @@
+{
+	"proxy": {
+		"port": 8000,
+		"set_x_proxied_by": true
+	},
+	"siteminder": {
+		"sm_cookie": "SMSESSION",
+		"login_url": "/public/siteminderagent/login.fcc",
+		"userid_field": "USERNAME",
+		"password_field": "PASSWORD",
+		"target_field": "TARGET"
+	},
+  "target_site": {
+    "root": "http://localhost:8000",
+    "logoff_url": "/system/logout"
+  },
+	"users":
+	[
+		{
+			"userid": "user1", 
+			"password": "test1234",
+			"headers": {
+				"client-id": "cid123",
+				"user-id": "uid456"
+			}
+		}
+	]
+}
