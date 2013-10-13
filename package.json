@@ -20,6 +20,7 @@
   },
   "dependencies": {
   	"http-proxy": "0.10.x",
-    "expect.js": "0.2.x"
+    "expect.js": "0.2.x",
+    "cookies": "0.3.x"
   }
 }

@@ -75,9 +75,16 @@ describe('FakeMinder', function() {
     beforeEach(function() {
       request['method'] = 'GET';
       request['url'] = 'http://localhost:8000/';
-      response['setHeader'] = function(header, value) {
+      var setHeader = function(header, value) {
         this.headers = this.headers || {};
         this.headers[header] = value;
+      };
+      response['setHeader'] = setHeader;
+      // Stubs for supporting cookie.js
+      request['connection'] = { 'encrypted':false };
+      response['getHeader'] = function(header) {
+        this.headers = this.headers || {};
+        return this.headers[header];
       };
     });
 
@@ -115,9 +122,12 @@ describe('FakeMinder', function() {
         // Act
         subject.handleRequest(request, response);
         response.writeHead(200);
+        var cookies = response.headers['set-cookie'];
 
         // Assert
-        expect(response.headers['Set-Cookie']).to.contain('SMSESSION=LOGGEDOFF');
+        expect(cookies).to.be.ok();
+        expect(cookies).to.not.be.empty();
+        expect(cookies[0]).to.contain('SMSESSION=LOGGEDOFF');
       });
 
       it('removes the existing session corresponding to the SMSESSION cookie value');
