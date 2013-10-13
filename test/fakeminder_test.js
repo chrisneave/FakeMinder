@@ -75,13 +75,17 @@ describe('FakeMinder', function() {
     beforeEach(function() {
       request['method'] = 'GET';
       request['url'] = 'http://localhost:8000/';
-      var setHeader = function(header, value) {
+      response['setHeader'] = function(header, value) {
         this.headers = this.headers || {};
         this.headers[header] = value;
       };
-      response['setHeader'] = setHeader;
       // Stubs for supporting cookie.js
       request['connection'] = { 'encrypted':false };
+      request['setHeader'] = function(header, value) {
+        this.headers = this.headers || {};
+        this.headers[header] = value;
+      };
+      request['headers'] = {};
       response['getHeader'] = function(header) {
         this.headers = this.headers || {};
         return this.headers[header];
@@ -145,7 +149,19 @@ describe('FakeMinder', function() {
         expect(cookies[0]).to.contain('SMSESSION=LOGGEDOFF');
       });
 
-      it('removes the existing session corresponding to the SMSESSION cookie value');
+      it('removes the existing session corresponding to the SMSESSION cookie value', function() {
+        // Arrange
+        request.url = 'http://localhost:8000/system/logout';
+        subject.sessions = {'session1':{}, 'session2':{}, 'session3':{}};
+        request.headers = {'cookie':'SMSESSION=session2'};
+
+        // Act
+        subject.handleRequest(request, response);
+        response.writeHead(200);
+
+        // Assert
+        expect(subject.sessions).to.not.have.key('session2');
+      });
     });
 
     describe('when the request is a post to the login_url', function() {
