@@ -114,6 +114,21 @@ describe('FakeMinder', function() {
       expect(response.headers['x-proxied-by']).to.equal('localhost:8000');
     });
 
+    describe('when the request is for a protected URI', function() {
+      describe('and the request has no SMSESSION cookie', function() {
+        it('redirects the user to the Not Authenticated URI');
+      });
+
+      describe('and the request has an SMSESSION cookie related to an expired session', function() {
+        it('redirects the user to the Not Authenticated URI');
+      });
+
+      describe('and the request has an SMSESSION cookie related to a valid session', function() {
+        it('Resets the expiration of the session')
+        it('Adds identity headers to the forwarded request');
+      });
+    });
+
     describe('when the logoff_url is requested', function() {
       it('adds an SMSESSION cookie with a value of LOGGEDOFF to the response', function() {
         // Arrange
