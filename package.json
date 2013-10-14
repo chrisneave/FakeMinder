@@ -4,7 +4,9 @@
   "description": "Fake implementation of CA SiteMinder to use for developer testing",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run": "nodejs main.js",
+    "test": "mocha --",
+    "coverage": "istanbul cover _mocha -- -R spec && open coverage/lcov-report/index.html"
   },
   "repository": {
     "type": "git",
@@ -14,13 +16,14 @@
     "siteminder"
   ],
   "author": "Chris Neave",
-  "license": "BSD",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/chrisneave/fakeminder/issues"
   },
   "dependencies": {
   	"http-proxy": "0.10.x",
-    "expect.js": "0.2.x",
-    "cookies": "0.3.x"
+    "cookies": "0.3.x",
+    "mocha": "x",
+    "expect.js": "x"
   }
 }
