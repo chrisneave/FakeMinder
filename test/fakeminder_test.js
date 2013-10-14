@@ -1,5 +1,6 @@
 var assert = require('assert');
 var expect = require('expect.js');
+var fs = require('fs');
 var FakeMinder = require('../lib/fakeminder.js');
 
 describe('FakeMinder', function() {
@@ -21,6 +22,33 @@ describe('FakeMinder', function() {
 
     // Assert
     expect(emptySession).to.eql({'user':''});
+  });
+
+  it('parses the config.json file and writes it to the config property', function() {
+    // Arrange
+    var file = __dirname + '/../config.json';
+    var json;
+    var json = fs.readFileSync(file, 'utf8');
+    json = JSON.parse(json);
+
+    // Stub out the fs.readFile function.
+    /*
+    var rf = fs.readFileSync;
+    fs.readFileSync = function(file, encoding) {
+      this.readFileSync = rf;
+      if (file.indexOf('/../config.json') > 0) {
+        return json;
+      } else {
+        return;
+      }
+    };
+    */
+
+    // Act
+    subject = new FakeMinder();
+
+    // Assert
+    expect(subject.config).to.eql(json);
   });
 
   describe('#getUserForCurrentSession()', function() {
