@@ -1,13 +1,13 @@
 var assert = require('assert');
 var expect = require('expect.js');
-var fm = require('../lib/fakeminder.js');
+var FakeMinder = require('../lib/fakeminder.js');
 
 describe('FakeMinder', function() {
   var subject;
   var emptySession;
 
   beforeEach(function() {
-    subject = new fm.FakeMinder();
+    subject = new FakeMinder();
     emptySession = { 'user':'' };
     subject.config['target_site'] = {
       'host':'http://localhost:8000',
@@ -92,25 +92,11 @@ describe('FakeMinder', function() {
       };
     });
 
-    it('replaces the response writeHead method with the original implementation', function() {
-      // Arrange
-      var writeHead = 'writeHead';
-      response['writeHead'] = writeHead;
-
-      // Act
-      subject.handleRequest(request, response);
-      response.writeHead(200);
-
-      // Assert
-      expect(response.writeHead).to.equal(writeHead);
-    });
-
     it('adds a "x-proxied-by" header value with the host/port value of the proxy', function() {
       // Arrange
 
       // Act
       subject.handleRequest(request, response);
-      response.writeHead(200);
 
       // Assert
       expect(response.headers).to.be.ok();
@@ -140,7 +126,6 @@ describe('FakeMinder', function() {
 
         // Act
         subject.handleRequest(request, response);
-        response.writeHead(200);
         var cookies = response.headers['set-cookie'];
 
         // Assert
@@ -157,7 +142,6 @@ describe('FakeMinder', function() {
 
         // Act
         subject.handleRequest(request, response);
-        response.writeHead(200);
 
         // Assert
         expect(subject.sessions).to.not.have.key('session2');
