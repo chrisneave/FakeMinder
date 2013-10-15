@@ -19,15 +19,13 @@
       "protected": "/protected"
     }
   },
-	"users":
-	[
-		{
-			"userid": "user1", 
+	"users": {
+		"user1" : {
 			"password": "test1234",
-			"headers": {
+			"auth_headers": {
 				"client-id": "cid123",
 				"user-id": "uid456"
 			}
 		}
-	]
+  }
 }

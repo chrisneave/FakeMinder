@@ -209,14 +209,18 @@ describe('FakeMinder', function() {
           subject.sessions = {
             'xyz' : {
               'name' : 'bob',
-              'session_expires' : sessionExpiry.toJSON(),
+              'session_expires' : sessionExpiry.toJSON()
+            }
+          };
+          subject.config.users = {
+            'bob' : {
               'auth_headers' : {
                 'header1' : 'auth1',
                 'header2' : 'auth2',
                 'header3' : 'auth3'
               }
             }
-          };
+          }
         });
 
         it('resets the expiration of the session', function() {
