@@ -11,6 +11,9 @@ describe('FakeMinder', function() {
   beforeEach(function() {
     subject = new FakeMinder();
     emptySession = { 'user':'' };
+    subject.config['siteminder'] = {
+      'session_expiry_minutes':20
+    };
     subject.config['target_site'] = {
       'root':'http://localhost:8000',
       'urls':{
@@ -216,9 +219,20 @@ describe('FakeMinder', function() {
           };
         });
 
-        it('Resets the expiration of the session');
+        it('resets the expiration of the session', function() {
+          // Arrange
+          var now = new Date();
+          var expected_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
 
-        it('Adds identity headers to the forwarded request', function() {
+          // Act
+          var forward_to_proxy = subject.handleRequest(request, response);
+          var session_expired_date = new Date(subject.sessions['xyz'].session_expires);
+
+          // Assert
+          expect(session_expired_date).to.eql(expected_expiry);
+        });
+
+        it('adds identity headers to the forwarded request', function() {
           // Act
           var forward_to_proxy = subject.handleRequest(request, response);
 
@@ -251,6 +265,8 @@ describe('FakeMinder', function() {
     });
 
     describe('when the logoff_url is requested', function() {
+      it('creates a new session for the user');
+
       it('adds an SMSESSION cookie with a value of LOGGEDOFF to the response', function() {
         // Arrange
         request.url = 'http://localhost:8000/system/logout';
