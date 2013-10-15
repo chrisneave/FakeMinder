@@ -7,7 +7,8 @@
 		"sm_cookie": "SMSESSION",
 		"userid_field": "USERNAME",
 		"password_field": "PASSWORD",
-		"target_field": "TARGET"
+		"target_field": "TARGET",
+    "session_expiry_minutes": 20
 	},
   "target_site": {
     "root": "http://localhost:8000",

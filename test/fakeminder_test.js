@@ -1,6 +1,7 @@
 var assert = require('assert');
 var expect = require('expect.js');
 var fs = require('fs');
+var Cookies = require('cookies');
 var FakeMinder = require('../lib/fakeminder.js');
 
 describe('FakeMinder', function() {
@@ -101,10 +102,12 @@ describe('FakeMinder', function() {
   });
 
   describe('#handleRequest()', function() {
-    var request = {};
-    var response = {};
+    var request;
+    var response;
 
     beforeEach(function() {
+      request = {};
+      response = {};
       request['method'] = 'GET';
       request['url'] = 'http://localhost:8000/';
       response['setHeader'] = function(header, value) {
@@ -140,6 +143,7 @@ describe('FakeMinder', function() {
     });
 
     describe('when the request is for a protected URI', function() {
+
       describe('and the request has no SMSESSION cookie', function() {
         it('redirects the user to the Not Authenticated URI', function() {
           // Arrange
@@ -154,13 +158,95 @@ describe('FakeMinder', function() {
         });
       });
 
+      describe('and the request has an SMSESSION cookie that does not exist', function() {
+        it('redirects the user to the Not Authenticated URI', function() {
+          // Arrange
+          request.url = 'http://localhost:8000/protected/home';
+          request.headers['cookie'] = 'SMSESSION=abc';
+
+          // Act
+          subject.handleRequest(request, response);
+
+          // Assert
+          expect(response.statusCode).to.be(302);
+          expect(response.headers['Location']).to.be('http://localhost:8000/system/error/notauthenticated');
+        });
+      });
+
       describe('and the request has an SMSESSION cookie related to an expired session', function() {
-        it('redirects the user to the Not Authenticated URI');
+        it('redirects the user to the Not Authenticated URI', function() {
+          // Arrange
+          request.url = 'http://localhost:8000/protected/home';
+          request.headers['cookie'] = 'SMSESSION=xyz';
+          var now = new Date();
+          var sessionExpiry = new Date(now.getTime() - 30 * 60000);
+          subject.sessions = {
+            'xyz' : {
+              'name' : 'bob',
+              'session_expires' : sessionExpiry.toJSON()
+            }
+          };
+          
+          // Act
+          subject.handleRequest(request, response);
+
+          // Assert
+          expect(response.statusCode).to.be(302);
+          expect(response.headers['Location']).to.be('http://localhost:8000/system/error/notauthenticated');          
+        });
       });
 
       describe('and the request has an SMSESSION cookie related to a valid session', function() {
-        it('Resets the expiration of the session')
-        it('Adds identity headers to the forwarded request');
+        beforeEach(function() {
+          // Arrange
+          request.url = 'http://localhost:8000/protected/home';
+          request.headers['cookie'] = 'SMSESSION=xyz';
+          var now = new Date();
+          var sessionExpiry = new Date(now.getTime() - 10 * 60000);
+          subject.sessions = {
+            'xyz' : {
+              'name' : 'bob',
+              'session_expires' : sessionExpiry.toJSON(),
+              'auth_headers' : {
+                'header1' : 'auth1',
+                'header2' : 'auth2',
+                'header3' : 'auth3'
+              }
+            }
+          };
+        });
+
+        it('Resets the expiration of the session');
+
+        it('Adds identity headers to the forwarded request', function() {
+          // Act
+          var forward_to_proxy = subject.handleRequest(request, response);
+
+          // Assert
+          expect(response.headers).to.have.keys(['header1', 'header2', 'header3']);
+          expect(response.headers['header1']).to.equal('auth1');
+          expect(response.headers['header2']).to.equal('auth2');
+          expect(response.headers['header3']).to.equal('auth3');
+        });
+
+        it('forwards the request to the proxy', function() {
+          // Act
+          var forward_to_proxy = subject.handleRequest(request, response);
+
+          // Assert
+          expect(forward_to_proxy).to.be.ok();
+          expect(response['statusCode']).to.be(undefined);
+        });
+
+        it('Sets the SMSESSION cookie to the session ID, domain being proxied and sets HttpOnly to true', function() {
+          // Act
+          subject.handleRequest(request, response);
+          var cookie_jar = new Cookies(request, response);
+          var session_cookie = cookie_jar.get('SMSESSION');
+
+          // Assert
+          expect(session_cookie).to.equal('xyz');
+        });
       });
     });
 
