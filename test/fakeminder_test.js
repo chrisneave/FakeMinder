@@ -11,8 +11,12 @@ describe('FakeMinder', function() {
     subject = new FakeMinder();
     emptySession = { 'user':'' };
     subject.config['target_site'] = {
-      'host':'http://localhost:8000',
-      'logoff_url':'/system/logout'
+      'root':'http://localhost:8000',
+      'urls':{
+        'logoff':'/system/logout',
+        'not_authenticated':'/system/error/notauthenticated',
+        'protected':'/protected'
+      }
     };
   });
 
@@ -118,6 +122,9 @@ describe('FakeMinder', function() {
         this.headers = this.headers || {};
         return this.headers[header];
       };
+      response['end'] = function() {
+
+      };
     });
 
     it('adds a "x-proxied-by" header value with the host/port value of the proxy', function() {
@@ -134,7 +141,17 @@ describe('FakeMinder', function() {
 
     describe('when the request is for a protected URI', function() {
       describe('and the request has no SMSESSION cookie', function() {
-        it('redirects the user to the Not Authenticated URI');
+        it('redirects the user to the Not Authenticated URI', function() {
+          // Arrange
+          request.url = 'http://localhost:8000/protected/home';
+
+          // Act
+          subject.handleRequest(request, response);
+
+          // Assert
+          expect(response.statusCode).to.be(302);
+          expect(response.headers['Location']).to.be('http://localhost:8000/system/error/notauthenticated');
+        });
       });
 
       describe('and the request has an SMSESSION cookie related to an expired session', function() {

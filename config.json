@@ -5,14 +5,18 @@
 	},
 	"siteminder": {
 		"sm_cookie": "SMSESSION",
-		"login_url": "/public/siteminderagent/login.fcc",
 		"userid_field": "USERNAME",
 		"password_field": "PASSWORD",
 		"target_field": "TARGET"
 	},
   "target_site": {
     "root": "http://localhost:8000",
-    "logoff_url": "/system/logout"
+    "urls": {
+      "login": "/public/siteminderagent/login.fcc",
+      "logoff": "/system/logout",
+      "not_authenticated": "/system/error/notauthenticated",
+      "protected": "/protected"
+    }
   },
 	"users":
 	[
