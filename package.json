@@ -4,8 +4,8 @@
   "description": "Fake implementation of CA SiteMinder to use for developer testing",
   "main": "main.js",
   "scripts": {
-    "run": "nodejs main.js",
-    "test": "mocha --",
+    "run": "clear && node main.js",
+    "test": "clear && mocha -R spec",
     "coverage": "istanbul cover _mocha -- -R spec && open coverage/lcov-report/index.html"
   },
   "repository": {
