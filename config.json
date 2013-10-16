@@ -11,6 +11,8 @@
     "session_expiry_minutes": 20
 	},
   "target_site": {
+    "host": "localhost",
+    "port": 4567,
     "root": "http://localhost:8000",
     "urls": {
       "login": "/public/siteminderagent/login.fcc",
