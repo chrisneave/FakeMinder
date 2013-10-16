@@ -59,51 +59,6 @@ describe('FakeMinder', function() {
     expect(subject.config).to.eql(json);
   });
 
-  describe('#getUserForCurrentSession()', function() {
-    it('finds the session that matches the current SmSession cookie.', function() {
-      var existingSession = {
-        'xyz' : {
-          'name' :'bob'
-        }
-      };
-      subject.sessions = existingSession;
-      var req = {
-        'headers': {
-          'cookie':'SMSESSION=xyz'
-        }
-      };
-
-      var session = subject.getUserForCurrentSession(req);
-
-      expect(session['name']).to.equal('bob');
-    });
-
-    it('returns an empty session for an SmSession cookie that does not match an existing session.', function() {
-      subject.sessions = {'xyz':''};
-      var req = { 'headers':{'cookie':'SMSESSION=abc'} };
-
-      var session = subject.getUserForCurrentSession(req);
-
-      expect(session).to.eql(emptySession);
-    });
-
-    it('returns an empty session if an SmSession cookie does not exist.', function() {
-      var req = { 'headers':{'cookie':'SMSESSION=abc'} };
-
-      var session = subject.getUserForCurrentSession(req);
-
-      expect(session).to.eql(emptySession);
-    });
-
-    it('returns an empty session if there are no active sessions.', function() {
-      var req = { 'headers':{} };
-
-      var session = subject.getUserForCurrentSession(req);
-
-      expect(session).to.eql(emptySession);
-    })
-  });
-
   describe('#handleRequest()', function() {
     var request;
     var response;
