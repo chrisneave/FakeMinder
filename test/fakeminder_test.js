@@ -100,6 +100,31 @@ describe('FakeMinder', function() {
       expect(response.headers['x-proxied-by']).to.equal('localhost:8000');
     });
 
+    describe('when the request is not for a protected URI', function() {
+      it('proxies the request', function() {
+        // Arrange
+        request.url = 'http://localhost:8000/public/home';
+
+        // Act
+        var proxied = subject.handleRequest(request, response);
+
+        // Assert
+        expect(proxied).to.be.ok();
+      });
+
+      it('does not set an SMSESSION cookie in the response', function() {
+        // Arrange
+        request.url = 'http://localhost:8000/public/home';
+
+        // Act
+        subject.handleRequest(request, response);
+
+        // Assert
+        console.log(response.headers);
+        expect(response.headers['set-cookie']).to.not.be.ok();
+      });
+    });
+
     describe('when the request is for a protected URI', function() {
 
       describe('and the request has no SMSESSION cookie', function() {
@@ -189,6 +214,11 @@ describe('FakeMinder', function() {
 
           // Assert
           expect(session_expired_date.getFullYear()).to.equal(expected_expiry.getFullYear());
+          expect(session_expired_date.getMonth()).to.equal(expected_expiry.getMonth());
+          expect(session_expired_date.getDay()).to.equal(expected_expiry.getDay());
+          expect(session_expired_date.getHours()).to.equal(expected_expiry.getHours());
+          expect(session_expired_date.getMinutes()).to.equal(expected_expiry.getMinutes());
+          expect(session_expired_date.getSeconds()).to.equal(expected_expiry.getSeconds());
         });
 
         it('adds identity headers to the forwarded request', function() {
