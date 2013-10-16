@@ -188,7 +188,7 @@ describe('FakeMinder', function() {
           var session_expired_date = new Date(subject.sessions['xyz'].session_expires);
 
           // Assert
-          expect(session_expired_date).to.eql(expected_expiry);
+          expect(session_expired_date.getFullYear()).to.equal(expected_expiry.getFullYear());
         });
 
         it('adds identity headers to the forwarded request', function() {
@@ -224,8 +224,6 @@ describe('FakeMinder', function() {
     });
 
     describe('when the logoff_url is requested', function() {
-      it('creates a new session for the user');
-
       it('adds an SMSESSION cookie with a value of LOGGEDOFF to the response', function() {
         // Arrange
         request.url = 'http://localhost:8000/system/logout';
@@ -256,6 +254,8 @@ describe('FakeMinder', function() {
 
     describe('when the request is a post to the login_url', function() {
       describe('when the credentials are valid', function() {
+        it('destroys any existing session for the user');
+        it('creates a new session for the user');
         it('adds an SMSESSION cookie with the session ID to the response');
         it('responds with a redirect to the TARGET URI');
       });
@@ -266,6 +266,7 @@ describe('FakeMinder', function() {
 
       describe('when the PASSWORD is not valid', function() {
         it('responds with a redirect to the bad password URI');
+        it('increments the number of login attempts associated with the user');
       });
 
       describe('when the number of login attempts has been exceeded', function() {
