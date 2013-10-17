@@ -304,7 +304,4 @@ describe('FakeMinder', function() {
       });
     });
   })
-
-  describe('#beginSession()', function(req, res) {
-  });
 });
