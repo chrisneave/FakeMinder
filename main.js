@@ -10,7 +10,8 @@ var target_hostname = target_host + ':' + target_port;
 var server = httpProxy.createServer(function(req, res, proxy) {
 
   if (fm.handleRequest(req, res)) {
-    console.log('proxying request -> ' + req.method + ' ' + req.url);
+    console.log('Proxying request -> ' + req.method + ' ' + req.url);
+
     proxy.proxyRequest(req, res, {
       host: target_host,
       port: target_port
