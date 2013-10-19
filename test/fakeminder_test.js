@@ -328,4 +328,10 @@ describe('FakeMinder', function() {
       it('responds with a redirect to the account locked URI');
     });
   });
+
+  describe('#extractPostDataFromRequest', function() {
+    it('reads data from the request asynchronously');
+    it('limits the amount of data read to 1024 bytes');
+    it('reads all of the first 1024 bytes of data');
+  })
 });
