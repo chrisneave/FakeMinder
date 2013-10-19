@@ -5,8 +5,10 @@ var Cookies = require('cookies');
 var FakeMinder = require('../lib/fakeminder.js');
 
 describe('FakeMinder', function() {
-  var subject;
-  var emptySession;
+  var subject,
+      emptySession,
+      request,
+      response;
 
   beforeEach(function() {
     subject = new FakeMinder();
@@ -19,9 +21,31 @@ describe('FakeMinder', function() {
       'urls':{
         'logoff':'/system/logout',
         'not_authenticated':'/system/error/notauthenticated',
+        'logon':'/public/logon',
         'protected':'/protected'
       }
     };
+
+    request = {};
+    response = {};
+    request['method'] = 'GET';
+    request['url'] = 'http://localhost:8000/';
+    response['setHeader'] = function(header, value) {
+      this.headers = this.headers || {};
+      this.headers[header] = value;
+    };
+    // Stubs for supporting cookie.js
+    request['connection'] = { 'encrypted':false };
+    request['setHeader'] = function(header, value) {
+      this.headers = this.headers || {};
+      this.headers[header] = value;
+    };
+    request['headers'] = {};
+    response['getHeader'] = function(header) {
+      this.headers = this.headers || {};
+      return this.headers[header];
+    };
+    response['end'] = function() {};
   });
 
   it('it has an empty session', function() {
@@ -39,19 +63,6 @@ describe('FakeMinder', function() {
     var json = fs.readFileSync(file, 'utf8');
     json = JSON.parse(json);
 
-    // Stub out the fs.readFile function.
-    /*
-    var rf = fs.readFileSync;
-    fs.readFileSync = function(file, encoding) {
-      this.readFileSync = rf;
-      if (file.indexOf('/../config.json') > 0) {
-        return json;
-      } else {
-        return;
-      }
-    };
-    */
-
     // Act
     subject = new FakeMinder();
 
@@ -60,34 +71,6 @@ describe('FakeMinder', function() {
   });
 
   describe('#handleRequest()', function() {
-    var request;
-    var response;
-
-    beforeEach(function() {
-      request = {};
-      response = {};
-      request['method'] = 'GET';
-      request['url'] = 'http://localhost:8000/';
-      response['setHeader'] = function(header, value) {
-        this.headers = this.headers || {};
-        this.headers[header] = value;
-      };
-      // Stubs for supporting cookie.js
-      request['connection'] = { 'encrypted':false };
-      request['setHeader'] = function(header, value) {
-        this.headers = this.headers || {};
-        this.headers[header] = value;
-      };
-      request['headers'] = {};
-      response['getHeader'] = function(header) {
-        this.headers = this.headers || {};
-        return this.headers[header];
-      };
-      response['end'] = function() {
-
-      };
-    });
-
     it('adds a "x-proxied-by" header value with the host/port value of the proxy', function() {
       // Arrange
 
@@ -120,7 +103,6 @@ describe('FakeMinder', function() {
         subject.handleRequest(request, response);
 
         // Assert
-        console.log(response.headers);
         expect(response.headers['set-cookie']).to.not.be.ok();
       });
     });
@@ -253,7 +235,7 @@ describe('FakeMinder', function() {
       });
     });
 
-    describe('when the logoff_url is requested', function() {
+    describe('when the logoff URI is requested', function() {
       it('adds an SMSESSION cookie with a value of LOGGEDOFF to the response', function() {
         // Arrange
         request.url = 'http://localhost:8000/system/logout';
@@ -282,26 +264,68 @@ describe('FakeMinder', function() {
       });
     });
 
-    describe('when the request is a post to the login_url', function() {
-      describe('when the credentials are valid', function() {
-        it('destroys any existing session for the user');
-        it('creates a new session for the user');
-        it('adds an SMSESSION cookie with the session ID to the response');
-        it('responds with a redirect to the TARGET URI');
+    describe('when the request is a POST to the logon URI', function() {
+      it('calls handleLogonRequest() once', function(done) {
+        // Arrange
+        var times_called = 0;
+        var params = [];
+        subject.handleLogonRequest = function(current_session, post_data) {
+          times_called++;
+          params.push({'current_session':current_session, 'post_data':post_data});
+          done();
+        };
+        request.url = subject.config.target_site.root + subject.config.target_site.urls.logon;
+        request.method = 'POST';
+
+        // Act
+        subject.handleRequest(request, response);
+
+        // Assert
+        expect(times_called).to.equal(1);
+      });
+    })
+  });
+
+  describe('#handleLogonRequest', function() {
+    describe('when the credentials are valid', function() {
+      it('destroys any existing session for the user', function(done) {
+        // Arrange
+        request.url = 'http://localhost:8000/public/logoff';
+        request.headers['cookie'] = 'SMSESSION=xyz';
+        var now = new Date();
+        var sessionExpiry = new Date(now.getTime() - 10 * 60000);
+        subject.sessions = {
+          'xyz' : {
+            'name' : 'bob',
+            'session_expires' : sessionExpiry.toJSON()
+          }
+        };
+
+        // Act
+        subject.handleLogonRequest(request, response, function() {
+          done();
+        })
+
+        // Assert
+        expect(subject.sessions).to.be.empty();
       });
 
-      describe('when the USER is not valid', function() {
-        it('responds with a redirect to the bad login URI');
-      });
-
-      describe('when the PASSWORD is not valid', function() {
-        it('responds with a redirect to the bad password URI');
-        it('increments the number of login attempts associated with the user');
-      });
-
-      describe('when the number of login attempts has been exceeded', function() {
-        it('responds with a redirect to the account locked URI');
-      });
+      it('creates a new session for the user');
+      it('adds an SMSESSION cookie with the session ID to the response');
+      it('responds with a redirect to the TARGET URI');
     });
-  })
+
+    describe('when the USER is not valid', function() {
+      it('responds with a redirect to the bad login URI');
+    });
+
+    describe('when the PASSWORD is not valid', function() {
+      it('responds with a redirect to the bad password URI');
+      it('increments the number of login attempts associated with the user');
+    });
+
+    describe('when the number of login attempts has been exceeded', function() {
+      it('responds with a redirect to the account locked URI');
+    });
+  });
 });

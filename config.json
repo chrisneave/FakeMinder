@@ -15,7 +15,7 @@
     "port": 4567,
     "root": "http://localhost:8000",
     "urls": {
-      "login": "/public/siteminderagent/login.fcc",
+      "logon": "/public/siteminderagent/login.fcc",
       "logoff": "/system/logout",
       "not_authenticated": "/system/error/notauthenticated",
       "protected": "/protected"
