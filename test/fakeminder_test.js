@@ -358,7 +358,7 @@ describe('FakeMinder', function() {
         });
       });
 
-      it('adds an SMSESSION cookie with the session ID to the response', function(done) {
+      it('creates a new session with a 16 byte hexadecimal string session_id value', function(done) {
         // Arrange
         subject.sessions = {};
         var now = new Date();
@@ -366,7 +366,7 @@ describe('FakeMinder', function() {
 
         // Act
         subject.handleLogonRequest(post_data, function() {
-          expect(findSession().session_id).to.be.ok();
+          expect(findSession().session_id).to.match(/^([0-9a-fA-F]{2}){16}$/);
           done();
         });
       });
