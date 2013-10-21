@@ -22,7 +22,7 @@
     }
   },
 	"users": {
-		"user1" : {
+		"bob" : {
 			"password": "test1234",
 			"auth_headers": {
 				"client-id": "cid123",

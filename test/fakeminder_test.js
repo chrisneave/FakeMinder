@@ -269,9 +269,9 @@ describe('FakeMinder', function() {
         // Arrange
         var times_called = 0;
         var params = [];
-        subject.handleLogonRequest = function(current_session, post_data) {
+        subject.handleLogonRequest = function(post_data) {
           times_called++;
-          params.push({'current_session':current_session, 'post_data':post_data});
+          params.push({'post_data':post_data});
           done();
         };
         request.url = subject.config.target_site.root + subject.config.target_site.urls.logon;
@@ -288,30 +288,89 @@ describe('FakeMinder', function() {
 
   describe('#handleLogonRequest', function() {
     describe('when the credentials are valid', function() {
+      var post_data;
+
+      beforeEach(function() {
+        request.url = subject.config.target_site.root + subject.config.target_site.urls.logon;
+        request.method = 'POST';
+        post_data = {
+          'USERNAME':'bob',
+          'PASSWORD':'test1234',
+          'TARGET':'https://localhost:8000/protected/home'
+        };
+      });
+
+      var findSession = function(sessions) {
+        for (var session_id in subject.sessions) {
+          if (subject.sessions[session_id].name === 'bob') {
+            var found_session = subject.sessions[session_id];
+            found_session['session_id'] = session_id;
+            return found_session;
+          }
+        }
+      };
+
       it('destroys any existing session for the user', function(done) {
         // Arrange
-        request.url = 'http://localhost:8000/public/logoff';
-        request.headers['cookie'] = 'SMSESSION=xyz';
         var now = new Date();
-        var sessionExpiry = new Date(now.getTime() - 10 * 60000);
+        var session_expiry = new Date(now.getTime() - 30 * 60000);
         subject.sessions = {
           'xyz' : {
             'name' : 'bob',
-            'session_expires' : sessionExpiry.toJSON()
+            'session_expires' : session_expiry.toJSON()
+          },
+          'abc' : {
+            'name' : 'val',
+            'session_expires' : session_expiry.toJSON()
           }
         };
 
         // Act
-        subject.handleLogonRequest(request, response, function() {
+        subject.handleLogonRequest(post_data, function() {
+          // Assert
+          expect(subject.sessions).to.not.have.key('xyz');
           done();
-        })
-
-        // Assert
-        expect(subject.sessions).to.be.empty();
+        });
       });
 
-      it('creates a new session for the user');
-      it('adds an SMSESSION cookie with the session ID to the response');
+      it('creates a new session for the user', function(done) {
+        // Arrange
+        subject.sessions = {};
+
+        // Act
+        subject.handleLogonRequest(post_data, function() {
+          // Assert
+          expect(findSession()).to.be.ok();
+          done();
+        });
+      });
+
+      it('sets the new session to expire after the configured timeout', function(done) {
+        // Arrange
+        subject.sessions = {};
+        var now = new Date();
+        var session_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
+
+        // Act
+        subject.handleLogonRequest(post_data, function() {
+          expect(findSession().session_expires).to.equal(session_expiry.toJSON());
+          done();
+        });
+      });
+
+      it('adds an SMSESSION cookie with the session ID to the response', function(done) {
+        // Arrange
+        subject.sessions = {};
+        var now = new Date();
+        var session_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
+
+        // Act
+        subject.handleLogonRequest(post_data, function() {
+          expect(findSession().session_id).to.be.ok();
+          done();
+        });
+      });
+
       it('responds with a redirect to the TARGET URI');
     });
 
