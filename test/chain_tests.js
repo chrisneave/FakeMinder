@@ -49,9 +49,10 @@ describe('Chain', function() {
       // Arrange
       var i = 0;
       var result = [];
-      foo = function() {
+      foo = function(err, done) {
         i++;
         result.push(i);
+        done();
       }
       subject['queue'] = [foo, foo, foo];
 
@@ -60,6 +61,42 @@ describe('Chain', function() {
 
       // Assert
       expect(result).to.eql([1, 2, 3]);
+    });
+
+    it('passes the return value from one function as a parameter to the next');
+
+    it('passes a callback function for handling errors as the first parameter of each function call', function(done) {
+      // Arrange
+      var err_func;
+      foo = function(err) {
+        err_func = err;
+        err_func();
+        done();
+      };
+      subject['queue'] = [foo];
+
+      // Act
+      subject.execute();
+
+      // Assert
+      expect(err_func).to.be.ok();
+    });
+
+    it('passes a callback function for handling completion as the second parameter of each function call', function(done) {
+      // Arrange
+      var result_func;
+      foo = function(err, result) {
+        result_func = result;
+        result_func();
+        done();
+      };
+      subject['queue'] = [foo];
+
+      // Act
+      subject.execute();
+
+      // Assert
+      expect(result_func).to.be.ok();
     });
   });
 });
