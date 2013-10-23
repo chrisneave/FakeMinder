@@ -63,8 +63,6 @@ describe('Chain', function() {
       expect(result).to.eql([1, 2, 3]);
     });
 
-    it('passes the return value from one function as a parameter to the next');
-
     it('passes a callback function for handling errors as the first parameter of each function call', function(done) {
       // Arrange
       var err_func;
@@ -97,6 +95,23 @@ describe('Chain', function() {
 
       // Assert
       expect(result_func).to.be.ok();
+    });
+
+    it('passes data from one function to the next in the chain', function(done) {
+      // Arrange
+      foo = function(err, result, data) {
+        data = data ? data : 0;
+        data++;
+        if (data === 3) {
+          done();
+        } else {
+          result(data);
+        }
+      };
+      subject['queue'] = [foo, foo, foo];
+
+      // Act
+      subject.execute();
     });
   });
 });
