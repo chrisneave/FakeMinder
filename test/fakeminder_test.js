@@ -283,9 +283,10 @@ describe('FakeMinder', function() {
         // Arrange
         var times_called = 0;
         var params = [];
-        subject.handleLogonRequest = function(post_data, done) {
+        subject.handleLogonRequest = function(post_data, next) {
           times_called++;
           params.push({'post_data':post_data});
+          next();
         };
         request.url = subject.config.target_site.root + subject.config.target_site.urls.logon;
         request.method = 'POST';
@@ -305,20 +306,22 @@ describe('FakeMinder', function() {
     describe('when the request is a GET for the login URI', function() {
       it('returns a 400 response');
     })
-  });
 
-  describe('#handleLogonRequest', function() {
     describe('when the credentials are valid', function() {
       var post_data;
 
       beforeEach(function() {
         request.url = subject.config.target_site.root + subject.config.target_site.urls.logon;
         request.method = 'POST';
-        post_data = {
-          'USERNAME':'bob',
-          'PASSWORD':'test1234',
-          'TARGET':'https://localhost:8000/protected/home'
-        };
+        post_data = 'USERNAME=bob&PASSWORD=test1234&TARGET=https://localhost:8000/protected/home';
+        request.on = function(event, callback) {
+          if (event === 'data') {
+            callback(post_data);
+          }
+          if (event === 'end') {
+            callback();
+          }
+        }
       });
 
       var findSession = function(sessions) {
@@ -347,7 +350,7 @@ describe('FakeMinder', function() {
         };
 
         // Act
-        subject.handleLogonRequest(post_data, function() {
+        subject.handleRequest(request, response, function() {
           // Assert
           expect(subject.sessions).to.not.have.key('xyz');
           done();
@@ -359,7 +362,7 @@ describe('FakeMinder', function() {
         subject.sessions = {};
 
         // Act
-        subject.handleLogonRequest(post_data, function() {
+        subject.handleRequest(request, response, function() {
           // Assert
           expect(findSession()).to.be.ok();
           done();
@@ -373,7 +376,7 @@ describe('FakeMinder', function() {
         var session_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
 
         // Act
-        subject.handleLogonRequest(post_data, function() {
+        subject.handleRequest(request, response, function() {
           expect(findSession().session_expires).to.equal(session_expiry.toJSON());
           done();
         });
@@ -386,7 +389,7 @@ describe('FakeMinder', function() {
         var session_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
 
         // Act
-        subject.handleLogonRequest(post_data, function() {
+        subject.handleRequest(request, response, function() {
           expect(findSession().session_id).to.match(/^([0-9a-fA-F]{2}){16}$/);
           done();
         });
@@ -408,10 +411,4 @@ describe('FakeMinder', function() {
       it('responds with a redirect to the account locked URI');
     });
   });
-
-  describe('#extractPostDataFromRequest', function() {
-    it('reads data from the request asynchronously');
-    it('limits the amount of data read to 1024 bytes');
-    it('reads all of the first 1024 bytes of data');
-  })
 });
