@@ -7,11 +7,15 @@ var express = require('express');
 var routes = require('./routes');
 var http = require('http');
 var path = require('path');
+var fs = require('fs');
 
 var app = express();
 
+var json = fs.readFileSync(__dirname + '/../config.json', 'utf8');
+var fakeminder_config = JSON.parse(json);
+
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', fakeminder_config.target_site.port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.favicon());
