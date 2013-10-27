@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
+  </head>
+  <body>
+    <div class="container">
+      <h1><%= title %></h1>
+      <h3>HTTP Request Headers</h3>
+      <table class="table table-striped">
+        <thead>
+          <th>Header</th><th>Value</th>
+        </thead>
+        <tbody>
+          <% for(var header in headers) { %>
+            <tr>
+              <td><%= header %></td>
+              <td><%= headers[header] %></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
