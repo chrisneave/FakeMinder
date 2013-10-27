@@ -1,14 +1,18 @@
 
 exports.index = function(req, res) {
-  res.render('index', { title: 'Sample Target App' });
+  res.render('index', {
+    title: 'Sample Target App',
+    logoff_url: fakeminder_config.target_site.urls.logoff,
+    protected_url: fakeminder_config.target_site.urls.protected
+  });
 };
 
 exports.protected = function(req, res) {
   res.render('protected', { title: 'Protected', headers: req.headers });
 };
 
-exports.login = function(req, res) {
-  res.render('login', { title: 'Login' });
+exports.logon = function(req, res) {
+  res.render('logon', { title: 'Logon' });
 };
 
 exports.logoff = function(req, res) {

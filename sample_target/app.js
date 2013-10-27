@@ -12,7 +12,7 @@ var fs = require('fs');
 var app = express();
 
 var json = fs.readFileSync(__dirname + '/../config.json', 'utf8');
-var fakeminder_config = JSON.parse(json);
+fakeminder_config = JSON.parse(json);
 
 // all environments
 app.set('port', fakeminder_config.target_site.port);
@@ -32,7 +32,7 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 app.get(fakeminder_config.target_site.urls.protected, routes.protected);
-app.get('/public/login', routes.login);
+app.get('/public/logon', routes.logon);
 app.get(fakeminder_config.target_site.urls.logoff, routes.logoff);
 app.get(fakeminder_config.target_site.urls.not_authenticated, routes.not_authenticated);
 

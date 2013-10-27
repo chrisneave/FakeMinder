@@ -18,7 +18,8 @@
       "logon": "/public/siteminderagent/login.fcc",
       "logoff": "/system/logout",
       "not_authenticated": "/system/error/notauthenticated",
-      "protected": "/protected"
+      "protected": "/protected",
+      "public": "/"
     }
   },
 	"users": {
