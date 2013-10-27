@@ -6,7 +6,9 @@
   "scripts": {
     "run": "clear && node main.js",
     "test": "clear && mocha -R spec",
-    "coverage": "istanbul cover _mocha -- -R spec && open coverage/lcov-report/index.html"
+    "coverage": "istanbul cover _mocha -- -R spec && open coverage/lcov-report/index.html",
+    "run-sample": "clear && node ./sample_target/app.js",
+    "jshint": "clear && jshint ./lib/*.js main.js ./sample_target/routes/*.js ./sample_target/app.js"
   },
   "repository": {
     "type": "git",
