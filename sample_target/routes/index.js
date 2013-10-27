@@ -1,6 +1,6 @@
 
 exports.index = function(req, res) {
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: 'Sample Target App' });
 };
 
 exports.protected = function(req, res) {
