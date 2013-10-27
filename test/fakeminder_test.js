@@ -77,7 +77,9 @@ describe('FakeMinder', function() {
       // Act
       subject.handleRequest(request, response, function() {
         // Assert
-        expect(response.headers).to.be.ok();
+        expect(request.headers).to.be.ok();
+        expect(request.headers).to.have.key('x-proxied-by');
+        expect(request.headers['x-proxied-by']).to.equal('localhost:8000');
         expect(response.headers).to.have.key('x-proxied-by');
         expect(response.headers['x-proxied-by']).to.equal('localhost:8000');
         done();       
@@ -114,7 +116,7 @@ describe('FakeMinder', function() {
       describe('and the request has no SMSESSION cookie', function() {
         it('redirects the user to the Not Authenticated URI', function(done) {
           // Arrange
-          request.url = 'http://localhost:8000/protected/home';
+          request.url = 'http://localhost:8000/protected';
 
           // Act
           subject.handleRequest(request, response, function() {
@@ -214,10 +216,10 @@ describe('FakeMinder', function() {
           // Act
           subject.handleRequest(request, response, function() {
             // Assert
-            expect(response.headers).to.have.keys(['header1', 'header2', 'header3']);
-            expect(response.headers['header1']).to.equal('auth1');
-            expect(response.headers['header2']).to.equal('auth2');
-            expect(response.headers['header3']).to.equal('auth3');
+            expect(request.headers).to.have.keys(['header1', 'header2', 'header3']);
+            expect(request.headers['header1']).to.equal('auth1');
+            expect(request.headers['header2']).to.equal('auth2');
+            expect(request.headers['header3']).to.equal('auth3');
             done();
           });
         });
