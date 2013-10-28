@@ -119,10 +119,11 @@ describe('FakeMinder', function() {
           request.url = 'http://localhost:8000/protected';
 
           // Act
-          subject.handleRequest(request, response, function() {
+          subject.handleRequest(request, response, function(proxy_request) {
             // Assert
             expect(response.statusCode).to.be(302);
             expect(response.headers['Location']).to.be('http://localhost:8000/system/error/notauthenticated');
+            expect(proxy_request).to.not.be.ok();
             done();
           });
         });

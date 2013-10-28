@@ -8,14 +8,15 @@ var target_port = fm.config.target_site.port;
 var target_hostname = target_host + ':' + target_port;
 
 var server = httpProxy.createServer(function(req, res, proxy) {
+  fm.handleRequest(req, res, function(proxy_request) {
+    if (proxy_request) {
+      console.log('Proxying request -> ' + req.method + ' ' + req.url);
 
-  fm.handleRequest(req, res, function() {
-    console.log('Proxying request -> ' + req.method + ' ' + req.url);
-
-    proxy.proxyRequest(req, res, {
-      host: target_host,
-      port: target_port
-    });
+      proxy.proxyRequest(req, res, {
+        host: target_host,
+        port: target_port
+      });
+    }
   });
 }).listen(8000);
 
