@@ -27,6 +27,7 @@
     "cookies": "0.3.x",
     "mocha": "x",
     "expect.js": "x",
-    "express": "3.x"
+    "express": "3.x",
+    "ejs": "x"
   }
 }
