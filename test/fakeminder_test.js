@@ -247,6 +247,84 @@ describe('FakeMinder', function() {
           });
         });
       });
+
+      describe('and the request contains a FORMCRED cookie related to a valid login attempt', function() {
+        it('destroys any existing session for the user', function(done) {
+          // Arrange
+          var now = new Date();
+          var session_expiry = new Date(now.getTime() - 30 * 60000);
+          subject.sessions = {
+            'xyz' : {
+              'name' : 'bob',
+              'session_expires' : session_expiry.toJSON()
+            },
+            'abc' : {
+              'name' : 'val',
+              'session_expires' : session_expiry.toJSON()
+            }
+          };
+
+          // Act
+          subject.handleRequest(request, response, function() {
+            // Assert
+            expect(subject.sessions).to.not.have.key('xyz');
+            done();
+          });
+        });
+
+        it('creates a new session for the user', function(done) {
+          // Arrange
+          subject.sessions = {};
+
+          // Act
+          subject.handleRequest(request, response, function() {
+            // Assert
+            expect(findSession()).to.be.ok();
+            done();
+          });
+        });
+
+        it('sets the new session to expire after the configured timeout', function(done) {
+          // Arrange
+          subject.sessions = {};
+          var now = new Date();
+          var session_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
+
+          // Act
+          subject.handleRequest(request, response, function() {
+            expect(findSession().session_expires).to.equal(session_expiry.toJSON());
+            done();
+          });
+        });
+
+        it('creates a new session with a 16 byte hexadecimal string session_id value', function(done) {
+          // Arrange
+          subject.sessions = {};
+          var now = new Date();
+          var session_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
+
+          // Act
+          subject.handleRequest(request, response, function() {
+            expect(findSession().session_id).to.match(/^([0-9a-fA-F]{2}){16}$/);
+            done();
+          });
+        });
+
+        it('proxies the request');
+      });
+
+      describe('and the FORMCRED cookie maps to a bad login', function() {
+        it('responds with a redirect to the bad login URI');
+      });
+
+      describe('and the FORMCRED cookie maps to a bad password', function() {
+        it('responds with a redirect to the bad password URI');
+        it('increments the number of login attempts associated with the user');
+      });
+
+      describe('and the FORMCRED cookie maps to a failed number of login attempts', function() {
+        it('responds with a redirect to the account locked URI');
+      });
     });
 
     describe('when the logoff URI is requested', function() {
@@ -282,6 +360,32 @@ describe('FakeMinder', function() {
     });
 
     describe('when the request is a POST to the logon URI', function() {
+        var post_data;
+
+        beforeEach(function() {
+          request.url = subject.config.target_site.root + subject.config.target_site.urls.logon;
+          request.method = 'POST';
+          post_data = 'USERNAME=bob&PASSWORD=test1234&TARGET=https://localhost:8000/protected/home';
+          request.on = function(event, callback) {
+            if (event === 'data') {
+              callback(post_data);
+            }
+            if (event === 'end') {
+              callback();
+            }
+          }
+        });
+
+        var findSession = function(sessions) {
+          for (var session_id in subject.sessions) {
+            if (subject.sessions[session_id].name === 'bob') {
+              var found_session = subject.sessions[session_id];
+              found_session['session_id'] = session_id;
+              return found_session;
+            }
+          }
+        };
+
       it('calls handleLogonRequest() once', function(done) {
         // Arrange
         var times_called = 0;
@@ -291,11 +395,6 @@ describe('FakeMinder', function() {
           params.push({'post_data':post_data});
           next();
         };
-        request.url = subject.config.target_site.root + subject.config.target_site.urls.logon;
-        request.method = 'POST';
-        request.on = function(event, callback) {
-          callback('');
-        };
 
         // Act
         subject.handleRequest(request, response, function() {
@@ -304,114 +403,30 @@ describe('FakeMinder', function() {
           done();
         });
       });
+
+      describe('and the target URI belongs to the site being proxied', function() {
+        it('redirects to the URI specified by the target URI');
+      });
+
+      describe('and the target URI does not belong to the site being proxied', function() {
+        it('{determine what the correct behavior is}');
+      });
+
+      describe('and the USERNAME is not valid', function() {
+        it('sets a FORMCRED cookie that maps to a bad login attempt');
+      });
+
+      describe('and the PASSWORD is not valid', function() {
+        it('sets a FORMCRED cookie that maps to a bad password attempt');
+      });
+
+      describe('and the maximum number of login attempts is reached', function() {
+        it('sets a FORMCRED cookie that maps to a failed number of login attempts');
+      });
     })
 
     describe('when the request is a GET for the login URI', function() {
       it('returns a 400 response');
-    })
-
-    describe('when the credentials are valid', function() {
-      var post_data;
-
-      beforeEach(function() {
-        request.url = subject.config.target_site.root + subject.config.target_site.urls.logon;
-        request.method = 'POST';
-        post_data = 'USERNAME=bob&PASSWORD=test1234&TARGET=https://localhost:8000/protected/home';
-        request.on = function(event, callback) {
-          if (event === 'data') {
-            callback(post_data);
-          }
-          if (event === 'end') {
-            callback();
-          }
-        }
-      });
-
-      var findSession = function(sessions) {
-        for (var session_id in subject.sessions) {
-          if (subject.sessions[session_id].name === 'bob') {
-            var found_session = subject.sessions[session_id];
-            found_session['session_id'] = session_id;
-            return found_session;
-          }
-        }
-      };
-
-      it('destroys any existing session for the user', function(done) {
-        // Arrange
-        var now = new Date();
-        var session_expiry = new Date(now.getTime() - 30 * 60000);
-        subject.sessions = {
-          'xyz' : {
-            'name' : 'bob',
-            'session_expires' : session_expiry.toJSON()
-          },
-          'abc' : {
-            'name' : 'val',
-            'session_expires' : session_expiry.toJSON()
-          }
-        };
-
-        // Act
-        subject.handleRequest(request, response, function() {
-          // Assert
-          expect(subject.sessions).to.not.have.key('xyz');
-          done();
-        });
-      });
-
-      it('creates a new session for the user', function(done) {
-        // Arrange
-        subject.sessions = {};
-
-        // Act
-        subject.handleRequest(request, response, function() {
-          // Assert
-          expect(findSession()).to.be.ok();
-          done();
-        });
-      });
-
-      it('sets the new session to expire after the configured timeout', function(done) {
-        // Arrange
-        subject.sessions = {};
-        var now = new Date();
-        var session_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
-
-        // Act
-        subject.handleRequest(request, response, function() {
-          expect(findSession().session_expires).to.equal(session_expiry.toJSON());
-          done();
-        });
-      });
-
-      it('creates a new session with a 16 byte hexadecimal string session_id value', function(done) {
-        // Arrange
-        subject.sessions = {};
-        var now = new Date();
-        var session_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
-
-        // Act
-        subject.handleRequest(request, response, function() {
-          expect(findSession().session_id).to.match(/^([0-9a-fA-F]{2}){16}$/);
-          done();
-        });
-      });
-
-      it('responds with a redirect to the TARGET URI');
-    });
-
-    describe('when the USER is not valid', function() {
-      it('responds with a redirect to the bad login URI');
-    });
-
-    describe('when the PASSWORD is not valid', function() {
-      it('responds with a redirect to the bad password URI');
-      it('increments the number of login attempts associated with the user');
-    });
-
-    describe('when the number of login attempts has been exceeded', function() {
-      it('responds with a redirect to the account locked URI');
     });
   });
 });
