@@ -162,6 +162,20 @@ describe('FakeMinder', function() {
   });
 
   describe('#protectedHandler()', function() {
+    beforeEach(function() {
+      // Arrange
+      request.url = 'http://localhost:8000/protected/home';
+      subject.config.users = {
+        'bob' : {
+          'auth_headers' : {
+            'header1' : 'auth1',
+            'header2' : 'auth2',
+            'header3' : 'auth3'
+          }
+        }
+      }
+    });
+
     describe('and there is no current session', function() {
       it('redirects the user to the Not Authenticated URI', function() {
         // Arrange
@@ -179,8 +193,6 @@ describe('FakeMinder', function() {
 
     describe('and there is a current session', function() {
       beforeEach(function() {
-        // Arrange
-        request.url = 'http://localhost:8000/protected/home';
         var now = new Date();
         var sessionExpiry = new Date(now.getTime() - 10 * 60000);
         request.fm_session = {
@@ -189,17 +201,7 @@ describe('FakeMinder', function() {
           'session_expires' : sessionExpiry.toJSON()
         };
         subject.sessions['xyz'] = request.fm_session;
-        subject.config.users = {
-          'bob' : {
-            'auth_headers' : {
-              'header1' : 'auth1',
-              'header2' : 'auth2',
-              'header3' : 'auth3'
-            }
-          }
-        }
       });
-
 
       it('adds identity headers to the forwarded request', function(done) {
         // Act
@@ -231,18 +233,20 @@ describe('FakeMinder', function() {
     });
 
     describe('and the request contains a FORMCRED cookie related to a valid login attempt', function() {
+      beforeEach(function() {
+        subject.formcred = {
+          'fc123': {
+            'name': 'bob'
+          }
+        };
+        request.setHeader('cookie', 'FORMCRED=fc123');
+      });
+
       it('destroys any existing session for the user', function(done) {
         // Arrange
-        var now = new Date();
-        var session_expiry = new Date(now.getTime() - 30 * 60000);
         subject.sessions = {
           'xyz' : {
-            'name' : 'bob',
-            'session_expires' : session_expiry.toJSON()
-          },
-          'abc' : {
-            'name' : 'val',
-            'session_expires' : session_expiry.toJSON()
+            'name' : 'bob'
           }
         };
 
@@ -274,7 +278,13 @@ describe('FakeMinder', function() {
 
         // Act
         subject.protectedHandler(request, response, function() {
-          expect(findSession().session_expires).to.equal(session_expiry.toJSON());
+          var session_expired_date = new Date(findSession().session_expires);
+          expect(session_expired_date.getFullYear()).to.equal(session_expiry.getFullYear());
+          expect(session_expired_date.getMonth()).to.equal(session_expiry.getMonth());
+          expect(session_expired_date.getDay()).to.equal(session_expiry.getDay());
+          expect(session_expired_date.getHours()).to.equal(session_expiry.getHours());
+          expect(session_expired_date.getMinutes()).to.equal(session_expiry.getMinutes());
+          expect(session_expired_date.getSeconds()).to.equal(session_expiry.getSeconds());
           done();
         });
       });
@@ -365,9 +375,17 @@ describe('FakeMinder', function() {
       // Arrange
       var now = new Date();
       var expected_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
+      subject.sessions = {
+        'xyz' : {
+          'name' : 'bob'
+        }
+      };
+      request.fm_session = {};
+      request.fm_session[subject.SESSION_COOKIE] = 'xyz';
+      request.fm_session.name = 'bob';
 
       // Act
-      subject.handleRequest(request, response, function() {
+      subject.sessionFinalizer(request, response, function() {
         var session_expired_date = new Date(subject.sessions['xyz'].session_expires);
 
         // Assert
