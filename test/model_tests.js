@@ -55,6 +55,17 @@ describe('Session', function() {
       expect(subject.session_id).to.equal(expected);
     });
 
+    it('generates a random session_id if not specified', function() {
+      // Arrange
+      var subject;
+
+      // Act
+      subject = new Model.Session();
+
+      // Assert
+      expect(subject.session_id).to.be.ok();
+    });
+
     it('has a user', function() {
       // Arrange
       var subject,
@@ -95,6 +106,17 @@ describe('FormCred', function() {
       expect(subject.formcred_id).to.equal(expected);
     });
 
+    it('generates a random formcred_id if not specified', function() {
+      // Arrange
+      var subject;
+
+      // Act
+      subject = new Model.FormCred();
+
+      // Assert
+      expect(subject.formcred_id).to.be.ok();
+    });
+
     it('has a user', function() {
       // Arrange
       var subject,
@@ -107,7 +129,7 @@ describe('FormCred', function() {
       expect(subject.user).to.equal(expected);
     });
 
-    it('has an status', function() {
+    it('has a status', function() {
       // Arrange
       var subject,
           expected = 'GOOD_CREDS';
