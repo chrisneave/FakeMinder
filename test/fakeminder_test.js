@@ -3,6 +3,7 @@ var expect = require('expect.js');
 var fs = require('fs');
 var Cookies = require('cookies');
 var FakeMinder = require('../lib/fakeminder.js');
+var Model = require('../lib/model.js');
 
 describe('FakeMinder', function() {
   var subject,
@@ -62,14 +63,6 @@ describe('FakeMinder', function() {
     return request.fm_session;
   };
 
-  it('it has an empty session', function() {
-    // Act
-    var emptySession = subject.emptySession;
-
-    // Assert
-    expect(emptySession).to.eql({'user':''});
-  });
-
   it('parses the config.json file and writes it to the config property', function() {
     // Arrange
     var file = __dirname + '/../config.json';
@@ -93,7 +86,7 @@ describe('FakeMinder', function() {
         // Act
         subject.sessionInitializer(request, response, function() {
           // Assert
-          expect(getFmSession(request)).to.eql(expected_value);
+          expect(request.fm_session).to.eql(expected_value);
           done();
         });
       });
@@ -108,14 +101,25 @@ describe('FakeMinder', function() {
         // Act
         subject.sessionInitializer(request, response, function() {
           // Assert
-          expect(getFmSession(request)).to.eql(expected_value);
+          expect(request.fm_session).to.eql(expected_value);
           done();
         });
       })
     });
 
     describe('when an SMSESSION is present and matches an existing session', function() {
-      it('sets fm_session to equal the matching session');
+      it('sets fm_session to equal the matching session', function() {
+        // Arrange
+        var session = new Model.Session();
+        subject.sessions[session.session_id] = session;
+        request.setHeader('cookie', 'SMSESSION=' + session.session_id);
+
+        // Act
+        subject.sessionInitializer(request, response, function() {
+          // Assert
+          expect(request.fm_session).to.equal(session);
+        });
+      });
     });
   });
 
@@ -374,19 +378,16 @@ describe('FakeMinder', function() {
     it('resets the expiration of the session', function(done) {
       // Arrange
       var now = new Date();
-      var expected_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
-      subject.sessions = {
-        'xyz' : {
-          'name' : 'bob'
-        }
-      };
-      request.fm_session = {};
-      request.fm_session[subject.SESSION_COOKIE] = 'xyz';
-      request.fm_session.name = 'bob';
+      var expected_expiry;
+      var session = new Model.Session();
+      session.user = new Model.User('bob');
+      subject.sessions[session.session_id] = session;
+      request.fm_session = session;
 
       // Act
       subject.sessionFinalizer(request, response, function() {
-        var session_expired_date = new Date(subject.sessions['xyz'].session_expires);
+        var session_expired_date = new Date(subject.sessions[session.session_id].expiration);
+        expected_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
 
         // Assert
         expect(session_expired_date.getFullYear()).to.equal(expected_expiry.getFullYear());
