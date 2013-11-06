@@ -42,6 +42,7 @@ describe('FakeMinder', function() {
       this.headers[header] = value;
     };
     request['headers'] = {};
+    response['headers'] = {};
     response['getHeader'] = function(header) {
       this.headers = this.headers || {};
       return this.headers[header];
@@ -217,15 +218,6 @@ describe('FakeMinder', function() {
           done();
         });
       });
-
-      it('Sets the SMSESSION cookie to the session ID, domain being proxied and sets HttpOnly to true', function(done) {
-        // Act
-        subject.protectedHandler(request, response, function() {
-          // Assert
-          expect(response.headers['set-cookie']).to.contain('SMSESSION=xyz; path=/; domain=localhost; httponly');
-          done();
-        });
-      });
     });
 
     describe('and the request contains a FORMCRED cookie related to a valid login attempt', function() {
@@ -327,13 +319,29 @@ describe('FakeMinder', function() {
       it('removes the existing session corresponding to the SMSESSION cookie value', function(done) {
         // Arrange
         request.url = 'http://localhost:8000/system/logout';
-        subject.sessions = {'session1':{}, 'session2':{}, 'session3':{}};
-        request.fm_session = {smsession: 'session2'};
+        var session = new Model.Session('session2');
+        subject.sessions = {'session1':{}, 'session2':session, 'session3':{}};
+        request.fm_session = session;
 
         // Act
         subject.logoffHandler(request, response, function() {
           // Assert
           expect(subject.sessions).to.not.have.key('session2');
+          done();
+        });
+      });
+    });
+
+    describe('when the logoff URI is not requested', function() {
+      it('Sets the SMSESSION cookie to the session ID, domain being proxied and sets HttpOnly to true', function(done) {
+        // Arrange
+        request.url = 'http://localhost:8000/';
+        request.fm_session = new Model.Session();
+
+        // Act
+        subject.logoffHandler(request, response, function() {
+          // Assert
+          expect(response.headers['set-cookie']).to.contain('SMSESSION=' + request.fm_session.session_id + '; path=/; domain=localhost; httponly');
           done();
         });
       });
