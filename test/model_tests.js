@@ -38,6 +38,18 @@ describe('User', function() {
       // Assert
       expect(subject.auth_headers).to.equal(expected);
     });
+
+    it('defaults auth_header to an empty object if not specified', function() {
+      // Arrange
+      var subject;
+      var expected = {};
+
+      // Act
+      subject = new Model.User('', '');
+
+      // Assert
+      expect(subject.auth_headers).to.eql(expected);
+    });
   })
 });
 
@@ -89,7 +101,22 @@ describe('Session', function() {
       // Assert
       expect(subject.expiration).to.equal(expected);
     });
-  })
+  });
+
+  describe('#resetExpiration', function() {
+    it('resets the expiration property to the current time + the specified session timeout in minutes', function() {
+      // Arrange
+      var now = new Date();
+      var expected = new Date(now.getTime() + 20 * 60000);
+      var subject = new Model.Session();
+
+      // Act
+      subject.resetExpiration(20);
+
+      // Assert
+      expect(new Date(subject.expiration)).to.eql(expected);
+    });
+  });
 });
 
 describe('FormCred', function() {
@@ -140,5 +167,5 @@ describe('FormCred', function() {
       // Assert
       expect(subject.status).to.equal(expected);
     });
-  })
+  });
 });
