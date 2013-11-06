@@ -51,7 +51,7 @@ describe('FakeMinder', function() {
 
   var findSession = function(sessions) {
     for (var session_id in subject.sessions) {
-      if (subject.sessions[session_id].name === 'bob') {
+      if (subject.sessions[session_id].user.name === 'bob') {
         var found_session = subject.sessions[session_id];
         found_session['session_id'] = session_id;
         return found_session;
@@ -81,7 +81,7 @@ describe('FakeMinder', function() {
     describe('when an SMSESSION cookie is not present', function() {
       it('sets fm_session to an empty object', function(done) {
         // Arrange
-        var expected_value = {};
+        var expected_value;
 
         // Act
         subject.sessionInitializer(request, response, function() {
@@ -95,7 +95,7 @@ describe('FakeMinder', function() {
     describe('when an SMSESSION is present that does not match an existing session', function() {
       it('sets fm_session to an empty object', function(done) {
         // Arrange
-        var expected_value = {};
+        var expected_value;
         request.setHeader('cookie', 'SMSESSION=foo');
 
         // Act
@@ -169,22 +169,14 @@ describe('FakeMinder', function() {
     beforeEach(function() {
       // Arrange
       request.url = 'http://localhost:8000/protected/home';
-      subject.config.users = {
-        'bob' : {
-          'auth_headers' : {
-            'header1' : 'auth1',
-            'header2' : 'auth2',
-            'header3' : 'auth3'
-          }
-        }
-      }
+      var user_bob = new Model.User('bob', 'test1234', {'header1':'auth1', 'header2':'auth2', 'header3':'auth3'});
+      subject.config.users[user_bob.name] = user_bob;
     });
 
     describe('and there is no current session', function() {
       it('redirects the user to the Not Authenticated URI', function() {
         // Arrange
         request.url = 'http://localhost:8000/protected';
-        request.fm_session = {};
 
         // Act
         subject.protectedHandler(request, response);
@@ -199,12 +191,12 @@ describe('FakeMinder', function() {
       beforeEach(function() {
         var now = new Date();
         var sessionExpiry = new Date(now.getTime() - 10 * 60000);
-        request.fm_session = {
-          'smsession': 'xyz',
-          'name' : 'bob',
-          'session_expires' : sessionExpiry.toJSON()
-        };
-        subject.sessions['xyz'] = request.fm_session;
+        var session = new Model.Session('xyz', new Model.User('bob'), sessionExpiry.toJSON());
+        request.fm_session = session;
+        session.user.auth_headers['header1'] = 'auth1';
+        session.user.auth_headers['header2'] = 'auth2';
+        session.user.auth_headers['header3'] = 'auth3';
+        subject.sessions[session.session_id] = session;
       });
 
       it('adds identity headers to the forwarded request', function(done) {
@@ -238,26 +230,20 @@ describe('FakeMinder', function() {
 
     describe('and the request contains a FORMCRED cookie related to a valid login attempt', function() {
       beforeEach(function() {
-        subject.formcred = {
-          'fc123': {
-            'name': 'bob'
-          }
-        };
-        request.setHeader('cookie', 'FORMCRED=fc123');
+        var formcred = new Model.FormCred('fc123', new Model.User('bob'), Model.FormCredStatus.good_login);
+        subject.formcred[formcred.formcred_id] = formcred;
+        request.setHeader('cookie', 'FORMCRED=' + formcred.formcred_id);
       });
 
       it('destroys any existing session for the user', function(done) {
         // Arrange
-        subject.sessions = {
-          'xyz' : {
-            'name' : 'bob'
-          }
-        };
+        var session = new Model.Session('xyz', new Model.User('bob'));
+        subject.sessions[session.session_id] = session;
 
         // Act
         subject.protectedHandler(request, response, function() {
           // Assert
-          expect(subject.sessions).to.not.have.key('xyz');
+          expect(subject.sessions).to.not.have.key(session.session_id);
           done();
         });
       });
@@ -282,7 +268,7 @@ describe('FakeMinder', function() {
 
         // Act
         subject.protectedHandler(request, response, function() {
-          var session_expired_date = new Date(findSession().session_expires);
+          var session_expired_date = new Date(findSession().expiration);
           expect(session_expired_date.getFullYear()).to.equal(session_expiry.getFullYear());
           expect(session_expired_date.getMonth()).to.equal(session_expiry.getMonth());
           expect(session_expired_date.getDay()).to.equal(session_expiry.getDay());
