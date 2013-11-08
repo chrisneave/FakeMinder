@@ -1,9 +1,10 @@
-var assert = require('assert');
-var expect = require('expect.js');
-var fs = require('fs');
-var Cookies = require('cookies');
-var FakeMinder = require('../lib/fakeminder.js');
-var Model = require('../lib/model.js');
+var assert = require('assert'),
+    expect = require('expect.js'),
+    fs = require('fs'),
+    url = require('url'),
+    Cookies = require('cookies'),
+    FakeMinder = require('../lib/fakeminder.js'),
+    Model = require('../lib/model.js');
 
 describe('FakeMinder', function() {
   var subject,
@@ -19,11 +20,12 @@ describe('FakeMinder', function() {
     };
     subject.config['target_site'] = {
       'root':'http://localhost:8000',
-      'urls':{
+      'urls': {
         'logoff':'/system/logout',
         'not_authenticated':'/system/error/notauthenticated',
         'logon':'/public/logon',
-        'protected':'/protected'
+        'protected':'/protected',
+        'bad_login': '/system/error/bad_login'
       }
     };
 
@@ -63,6 +65,10 @@ describe('FakeMinder', function() {
   var getFmSession = function(request) {
     return request.fm_session;
   };
+
+  var getTargetSiteUrl = function(url_type) {
+    return url.resolve(subject.config.target_site.root, subject.config.target_site.urls[url_type]);
+  }
 
   it('parses the config.json file and writes it to the config property', function() {
     // Arrange
@@ -184,7 +190,7 @@ describe('FakeMinder', function() {
 
         // Assert
         expect(response.statusCode).to.be(302);
-        expect(response.headers['Location']).to.be('http://localhost:8000/system/error/notauthenticated');
+        expect(response.headers['Location']).to.be(getTargetSiteUrl('not_authenticated'));
       });
     });
 
