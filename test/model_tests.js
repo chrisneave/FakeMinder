@@ -61,8 +61,8 @@ describe('User', function() {
 
       // Assert
       expect(subject.login_attempts).to.eql(expected);
-    })
-  })
+    });
+  });
 });
 
 describe('Session', function() {

@@ -23,13 +23,14 @@
       "public": "/"
     }
   },
-	"users": {
-		"bob" : {
+	"users": [
+		{
+      "name": "bob",
 			"password": "test1234",
 			"auth_headers": {
 				"client-id": "cid123",
 				"user-id": "uid456"
 			}
 		}
-  }
+  ]
 }

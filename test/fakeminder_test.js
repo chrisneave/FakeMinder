@@ -25,7 +25,8 @@ describe('FakeMinder', function() {
         'not_authenticated':'/system/error/notauthenticated',
         'logon':'/public/logon',
         'protected':'/protected',
-        'bad_login': '/system/error/bad_login'
+        'bad_login': '/system/error/bad_login',
+        'bad_password': '/system/error/bad_password'
       }
     };
 
@@ -292,12 +293,52 @@ describe('FakeMinder', function() {
     });
 
     describe('and the FORMCRED cookie maps to a bad login', function() {
-      it('responds with a redirect to the bad login URI');
+      it('responds with a redirect to the bad login URI', function() {
+        // Arrange
+        var user = new Model.User('bob');
+        var formcred = new Model.FormCred('fc123', user, Model.FormCredStatus.bad_login);
+        subject.formcred[formcred.formcred_id] = formcred;
+        request.setHeader('cookie', 'FORMCRED=' + formcred.formcred_id);
+        subject.config.users = [user];
+
+        // Act
+        subject.protectedHandler(request, response);
+
+        // Assert
+        expect(response.statusCode).to.be(302);
+        expect(response.headers['Location']).to.be(getTargetSiteUrl('bad_login'));
+      });
     });
 
     describe('and the FORMCRED cookie maps to a bad password', function() {
-      it('responds with a redirect to the bad password URI');
-      it('increments the number of login attempts associated with the user');
+      beforeEach(function() {
+        var user = new Model.User('bob');
+        var formcred = new Model.FormCred('fc123', user, Model.FormCredStatus.bad_password);
+        subject.formcred[formcred.formcred_id] = formcred;
+        request.setHeader('cookie', 'FORMCRED=' + formcred.formcred_id);
+        subject.config.users = [user];
+      });
+
+      it('responds with a redirect to the bad password URI', function() {
+        // Arrange
+
+        // Act
+        subject.protectedHandler(request, response);
+
+        // Assert
+        expect(response.statusCode).to.be(302);
+        expect(response.headers['Location']).to.be(getTargetSiteUrl('bad_password'));
+      });
+
+      it('increments the number of login attempts associated with the user', function() {
+        // Arrange
+
+        // Act
+        subject.protectedHandler(request, response);
+
+        // Assert
+        expect(subject.config.users[0].login_attempts).to.equal(1);
+      });
     });
 
     describe('and the FORMCRED cookie maps to a failed number of login attempts', function() {
