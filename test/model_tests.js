@@ -50,6 +50,18 @@ describe('User', function() {
       // Assert
       expect(subject.auth_headers).to.eql(expected);
     });
+
+    it('has a count of login attempts that defaults to zero', function() {
+      // Arrange
+      var subject;
+      var expected = 0;
+
+      // Act
+      subject = new Model.User('', '');
+
+      // Assert
+      expect(subject.login_attempts).to.eql(expected);
+    })
   })
 });
 
