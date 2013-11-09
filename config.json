@@ -8,7 +8,8 @@
 		"userid_field": "USERNAME",
 		"password_field": "PASSWORD",
 		"target_field": "TARGET",
-    "session_expiry_minutes": 20
+    "session_expiry_minutes": 20,
+    "max_login_attempts": 3
 	},
   "target_site": {
     "host": "localhost",
@@ -19,6 +20,8 @@
       "logoff": "/system/logout",
       "not_authenticated": "/system/error/notauthenticated",
       "bad_login": "/system/error/badlogin",
+      "bad_password": "/system/error/badpassword",
+      "account_locked": "/system/error/accountlocked",
       "protected": "/protected",
       "public": "/"
     }
@@ -30,7 +33,9 @@
 			"auth_headers": {
 				"client-id": "cid123",
 				"user-id": "uid456"
-			}
+			},
+      "login_attempts": 0,
+      "locked": false
 		}
   ]
 }

@@ -15,20 +15,8 @@ describe('FakeMinder', function() {
   beforeEach(function() {
     subject = new FakeMinder();
     emptySession = { 'user':'' };
-    subject.config['siteminder'] = {
-      'session_expiry_minutes':20
-    };
-    subject.config['target_site'] = {
-      'root':'http://localhost:8000',
-      'urls': {
-        'logoff':'/system/logout',
-        'not_authenticated':'/system/error/notauthenticated',
-        'logon':'/public/logon',
-        'protected':'/protected',
-        'bad_login': '/system/error/bad_login',
-        'bad_password': '/system/error/bad_password'
-      }
-    };
+    var json = fs.readFileSync(__dirname + '/../config.json', 'utf8');
+    subject.config = JSON.parse(json);
 
     request = {};
     response = {};
@@ -311,9 +299,12 @@ describe('FakeMinder', function() {
     });
 
     describe('and the FORMCRED cookie maps to a bad password', function() {
+      var user,
+          formcred;
+
       beforeEach(function() {
-        var user = new Model.User('bob');
-        var formcred = new Model.FormCred('fc123', user, Model.FormCredStatus.bad_password);
+        user = new Model.User('bob');
+        formcred = new Model.FormCred('fc123', user, Model.FormCredStatus.bad_password);
         subject.formcred[formcred.formcred_id] = formcred;
         request.setHeader('cookie', 'FORMCRED=' + formcred.formcred_id);
         subject.config.users = [user];
@@ -339,10 +330,34 @@ describe('FakeMinder', function() {
         // Assert
         expect(subject.config.users[0].login_attempts).to.equal(1);
       });
-    });
 
-    describe('and the FORMCRED cookie maps to a failed number of login attempts', function() {
-      it('responds with a redirect to the account locked URI');
+      describe('and the user has exceeded the maximum number of login attempts', function() {
+        it('locks the user\'s account', function() {
+          // Arrange
+          user.login_attempts = 2;
+
+          // Act
+          subject.protectedHandler(request, response);
+
+          // Assert
+          expect(user.locked).to.be.ok();
+        });
+      });
+
+      describe('and the user\'s account is locked', function() {
+        it('responds with a redirect to the account locked URI', function() {
+          // Arrange
+          user.locked = true;
+
+          // Act
+          subject.protectedHandler(request, response);
+
+          // Assert
+          expect(response.statusCode).to.be(302);
+          expect(response.headers['Location']).to.be(getTargetSiteUrl('account_locked'));
+        });
+
+      });
     });
   });
 
