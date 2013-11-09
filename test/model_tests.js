@@ -62,6 +62,18 @@ describe('User', function() {
       // Assert
       expect(subject.login_attempts).to.eql(expected);
     });
+
+    it('has a flag to indicate whether the user\'s account is locked', function() {
+      // Arrange
+      var subject;
+      var expected = false;
+
+      // Act
+      subject = new Model.User('', '');
+
+      // Assert
+      expect(subject.locked).to.eql(expected);
+    })
   });
 });
 
