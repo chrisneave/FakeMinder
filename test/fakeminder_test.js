@@ -170,7 +170,7 @@ describe('FakeMinder', function() {
     });
 
     describe('and there is no current session', function() {
-      it('redirects the user to the Not Authenticated URI', function() {
+      it('redirects the user to the not_authenticated URL', function() {
         // Arrange
         request.url = 'http://localhost:8000/protected';
 
