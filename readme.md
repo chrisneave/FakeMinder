@@ -6,6 +6,22 @@ A fake implementation of CA SiteMinder to enable easy development against SiteMi
 
 My own desire to mock SiteMinder to test my own custom implementations of login and change password changes.
 
+## Installation
+
+## Running Tests
+
+## Code Coverage
+
+Install Instanbul into your global packages using:
+
+`npm install instanbul -g`
+
+Then execute the npm script *coverage* using the following command:
+
+`npm run-script coverage`
+
+The results of the coverage test run will now be displayed in your default browser.
+
 ### Block access to protected URI
 
 Configure protected URI
