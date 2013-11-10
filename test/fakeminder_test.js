@@ -186,7 +186,7 @@ describe('FakeMinder', function() {
     describe('and there is a current session', function() {
       beforeEach(function() {
         var now = new Date();
-        var sessionExpiry = new Date(now.getTime() - 10 * 60000);
+        var sessionExpiry = new Date(now.getTime() + 10 * 60000);
         var session = new Model.Session('xyz', new Model.User('bob'), sessionExpiry.toJSON());
         request.fm_session = session;
         session.user.auth_headers['header1'] = 'auth1';
@@ -212,6 +212,25 @@ describe('FakeMinder', function() {
           // Assert
           done();
         });
+      });
+    });
+
+    describe('and there is an expired session', function() {
+      it('redirects the user-agent to the not_authenticated URL', function() {
+        // Arrange
+        request.url = 'http://localhost:8000/protected';
+        var now = new Date();
+        var sessionExpiry = new Date(now.getTime() - 120 * 60000);
+        var session = new Model.Session('xyz', new Model.User('bob'), sessionExpiry.toJSON());
+        request.fm_session = session;
+        subject.sessions[session.session_id] = session;
+
+        // Act
+        subject.protectedHandler(request, response);
+
+        // Assert
+        expect(response.statusCode).to.be(302);
+        expect(response.headers['Location']).to.be(getTargetSiteUrl('not_authenticated'));
       });
     });
 
