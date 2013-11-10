@@ -141,6 +141,55 @@ describe('Session', function() {
       expect(new Date(subject.expiration)).to.eql(expected);
     });
   });
+
+  describe('#hasExpired', function() {
+    it('returns \'true\' when the expiration property is less than the current date/time', function() {
+      // Arrange
+      var actual;
+      var expected = true;
+      var now = new Date();
+      var session_expiry = new Date(now.getTime() - 1 * 60000);
+      var subject = new Model.Session();
+      subject.expiration = session_expiry.toJSON();
+
+      // Act
+      actual = subject.hasExpired();
+
+      // Assert
+      expect(actual).to.equal(expected);
+    });
+
+    it('returns \'false\' when the expiration property is greater than the current date/time', function() {
+      // Arrange
+      var actual;
+      var expected = false;
+      var now = new Date();
+      var session_expiry = new Date(now.getTime() + 1 * 60000);
+      var subject = new Model.Session();
+      subject.expiration = session_expiry.toJSON();
+
+      // Act
+      actual = subject.hasExpired();
+
+      // Assert
+      expect(actual).to.equal(expected);
+    });
+
+    it('returns \'false\' when the expiration property is equals the current date/time', function() {
+      // Arrange
+      var actual;
+      var expected = false;
+      var now = new Date();
+      var subject = new Model.Session();
+      subject.expiration = now.toJSON();
+
+      // Act
+      actual = subject.hasExpired();
+
+      // Assert
+      expect(actual).to.equal(expected);
+    });
+  });
 });
 
 describe('FormCred', function() {
