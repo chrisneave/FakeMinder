@@ -378,6 +378,16 @@ describe('FakeMinder', function() {
 
       });
     });
+
+    describe('and the request is not for a protected folder', function() {
+      it('invokes the next middleware', function(done) {
+        // Arrange
+        request.url = 'http://localhost:8000/public';
+
+        // Act & assert
+        subject.protectedHandler(request, response, done);
+      });
+    })
   });
 
   describe('#logoffHandler()', function() {
