@@ -21,7 +21,7 @@ describe('FakeMinder', function() {
     request = {};
     response = {};
     request['method'] = 'GET';
-    request['url'] = 'http://localhost:8000/';
+    request['url'] = '/';
     response['setHeader'] = function(header, value) {
       this.headers = this.headers || {};
       this.headers[header] = value;
@@ -56,7 +56,7 @@ describe('FakeMinder', function() {
   };
 
   var getTargetSiteUrl = function(url_type) {
-    return url.resolve(subject.config.target_site.root, subject.config.target_site.urls[url_type]);
+    return subject.config.target_site.urls[url_type];
   }
 
   it('parses the config.json file and writes it to the config property', function() {
@@ -125,7 +125,7 @@ describe('FakeMinder', function() {
     beforeEach(function() {
       request.url = subject.config.target_site.root + subject.config.target_site.urls.logon;
       request.method = 'POST';
-      post_data = 'USERNAME=bob&PASSWORD=test1234&TARGET=https://localhost:8000/protected/home';
+      post_data = 'USERNAME=bob&PASSWORD=test1234&TARGET=http://localhost:8000/protected/home';
       request.on = function(event, callback) {
         if (event === 'data') {
           callback(post_data);
@@ -164,7 +164,7 @@ describe('FakeMinder', function() {
   describe('#protectedHandler()', function() {
     beforeEach(function() {
       // Arrange
-      request.url = 'http://localhost:8000/protected/home';
+      request.url = '/protected';
       var user_bob = new Model.User('bob', 'test1234', {'header1':'auth1', 'header2':'auth2', 'header3':'auth3'});
       subject.config.users[user_bob.name] = user_bob;
     });
@@ -172,8 +172,6 @@ describe('FakeMinder', function() {
     describe('and there is no current session', function() {
       it('redirects the user to the not_authenticated URL', function() {
         // Arrange
-        request.url = 'http://localhost:8000/protected';
-
         // Act
         subject.protectedHandler(request, response);
 
@@ -218,7 +216,7 @@ describe('FakeMinder', function() {
     describe('and there is an expired session', function() {
       it('redirects the user-agent to the not_authenticated URL', function() {
         // Arrange
-        request.url = 'http://localhost:8000/protected';
+        request.url = '/protected';
         var now = new Date();
         var sessionExpiry = new Date(now.getTime() - 120 * 60000);
         var session = new Model.Session('xyz', new Model.User('bob'), sessionExpiry.toJSON());
@@ -382,7 +380,7 @@ describe('FakeMinder', function() {
     describe('and the request is not for a protected folder', function() {
       it('invokes the next middleware', function(done) {
         // Arrange
-        request.url = 'http://localhost:8000/public';
+        request.url = '/public';
 
         // Act & assert
         subject.protectedHandler(request, response, done);
@@ -394,7 +392,7 @@ describe('FakeMinder', function() {
     describe('when the logoff URI is requested', function() {
       it('adds an SMSESSION cookie with a value of LOGGEDOFF to the response', function(done) {
         // Arrange
-        request.url = 'http://localhost:8000/system/logout';
+        request.url = '/system/logout';
         request.fm_session = {};
 
         // Act
@@ -409,7 +407,7 @@ describe('FakeMinder', function() {
 
       it('removes the existing session corresponding to the SMSESSION cookie value', function(done) {
         // Arrange
-        request.url = 'http://localhost:8000/system/logout';
+        request.url = '/system/logout';
         var session = new Model.Session('session2');
         subject.sessions = {'session1':{}, 'session2':session, 'session3':{}};
         request.fm_session = session;
@@ -424,18 +422,6 @@ describe('FakeMinder', function() {
     });
 
     describe('when the logoff URI is not requested', function() {
-      it('Sets the SMSESSION cookie to the session ID, domain being proxied and sets HttpOnly to true', function(done) {
-        // Arrange
-        request.url = 'http://localhost:8000/';
-        request.fm_session = new Model.Session();
-
-        // Act
-        subject.logoffHandler(request, response, function() {
-          // Assert
-          expect(response.headers['set-cookie']).to.contain('SMSESSION=' + request.fm_session.session_id + '; path=/; domain=localhost; httponly');
-          done();
-        });
-      });
     });
   });
 
