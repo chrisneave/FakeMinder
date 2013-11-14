@@ -23,14 +23,15 @@
     "url": "https://github.com/chrisneave/fakeminder/issues"
   },
   "dependencies": {
-  	"http-proxy": "0.10.x",
+    "http-proxy": "0.10.x",
     "cookies": "0.3.x",
     "express": "3.x",
     "ejs": "x",
     "underscore": "x"
   },
-  "devdependencies": {
+  "devDependencies": {
     "mocha": "x",
-    "expect.js": "x"
+    "expect.js": "x",
+    "cookie": "~0.1.0"
   }
 }

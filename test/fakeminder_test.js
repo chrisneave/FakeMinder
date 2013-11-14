@@ -2,7 +2,7 @@ var assert = require('assert'),
     expect = require('expect.js'),
     fs = require('fs'),
     url = require('url'),
-    Cookies = require('cookies'),
+    cookie = require('cookie'),
     FakeMinder = require('../lib/fakeminder.js'),
     Model = require('../lib/model.js');
 
@@ -121,11 +121,12 @@ describe('FakeMinder', function() {
 
   describe('#logonHandler()', function() {
     var post_data;
+    var target = 'http://localhost:8000/protected/home';
 
     beforeEach(function() {
-      request.url = subject.config.target_site.root + subject.config.target_site.urls.logon;
+      request.url = subject.config.target_site.urls.logon;
       request.method = 'POST';
-      post_data = 'USERNAME=bob&PASSWORD=test1234&TARGET=http://localhost:8000/protected/home';
+      post_data = 'USERNAME=bob&PASSWORD=test1234&TARGET=' + target;
       request.on = function(event, callback) {
         if (event === 'data') {
           callback(post_data);
@@ -137,11 +138,36 @@ describe('FakeMinder', function() {
     });
 
     describe('and the target URI belongs to the site being proxied', function() {
-      it('redirects to the URI specified by the target URI');
+      it('redirects to the URI specified by the target URI', function(done) {
+        // Arrange
+        // Act
+        subject.logonHandler(request, response, undefined, function() {
+          // Assert
+          expect(response.statusCode).to.be(302);
+          expect(response.headers['Location']).to.equal(target);
+          done();
+        });
+      });
     });
 
     describe('and the target URI does not belong to the site being proxied', function() {
       it('{determine what the correct behavior is}');
+    });
+
+    describe('and the USERNAME and PASSWORD are valid', function() {
+      it('sets a FORMCRED cookie that maps to a good login attempt', function(done) {
+        // Arrange
+        // Act
+        subject.logonHandler(request, response, undefined, function() {
+          // Assert
+          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          var formcred_id = cookies[subject.FORMCRED_COOKIE];
+          expect(subject.formcred[formcred_id].formcred_id).to.equal(formcred_id);
+          done();
+        });
+      });
+
+      it('creates a new FORMCRED that maps to the user');
     });
 
     describe('and the USERNAME is not valid', function() {
