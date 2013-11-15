@@ -3,6 +3,7 @@ var assert = require('assert'),
     fs = require('fs'),
     url = require('url'),
     cookie = require('cookie'),
+    _ = require('underscore'),
     FakeMinder = require('../lib/fakeminder.js'),
     Model = require('../lib/model.js');
 
@@ -120,13 +121,15 @@ describe('FakeMinder', function() {
   });
 
   describe('#logonHandler()', function() {
-    var post_data;
-    var target = 'http://localhost:8000/protected/home';
+    var post_data,
+        target = 'http://localhost:8000/protected/home',
+        user;
 
     beforeEach(function() {
       request.url = subject.config.target_site.urls.logon;
       request.method = 'POST';
-      post_data = 'USERNAME=bob&PASSWORD=test1234&TARGET=' + target;
+      user = 'bob'
+      post_data = 'USERNAME=' + user + '&PASSWORD=test1234&TARGET=' + target;
       request.on = function(event, callback) {
         if (event === 'data') {
           callback(post_data);
@@ -162,28 +165,56 @@ describe('FakeMinder', function() {
           // Assert
           var cookies = cookie.parse(response.headers['set-cookie'][0]);
           var formcred_id = cookies[subject.FORMCRED_COOKIE];
-          expect(subject.formcred[formcred_id].formcred_id).to.equal(formcred_id);
+          expect(subject.formcred[formcred_id].status).to.equal(Model.FormCredStatus.good_login);
           done();
         });
       });
 
-      it('creates a new FORMCRED that maps to the user');
+      it('creates a new FORMCRED that maps to the user', function(done) {
+        // Arrange
+        var expected = _.findWhere(subject.config.users, {'name': user});
+
+        // Act
+        subject.logonHandler(request, response, undefined, function() {
+          // Assert
+          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          var formcred_id = cookies[subject.FORMCRED_COOKIE];
+          expect(subject.formcred[formcred_id].user).to.equal(expected);
+          done();
+        });
+      });
     });
 
     describe('and the USERNAME is not valid', function() {
-      it('sets a FORMCRED cookie that maps to a bad login attempt');
+      it('sets a FORMCRED cookie that maps to a bad login attempt', function(done) {
+        // Arrange
+        post_data = 'USERNAME=fred&PASSWORD=test1234&TARGET=' + target;
+
+        // Act
+        subject.logonHandler(request, response, undefined, function() {
+          // Assert
+          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          var formcred_id = cookies[subject.FORMCRED_COOKIE];
+          expect(subject.formcred[formcred_id].status).to.equal(Model.FormCredStatus.bad_login);
+          done();
+        });
+      });
     });
 
     describe('and the PASSWORD is not valid', function() {
-      it('sets a FORMCRED cookie that maps to a bad password attempt');
-    });
+      it('sets a FORMCRED cookie that maps to a bad password attempt', function(done) {
+        // Arrange
+        post_data = 'USERNAME=' + user + '&PASSWORD=foobar1&TARGET=' + target;
 
-    describe('and the maximum number of login attempts is reached', function() {
-      it('sets a FORMCRED cookie that maps to a failed number of login attempts');
-    });
-
-    describe('when the request is a GET for the login URI', function() {
-      it('returns a 400 response');
+        // Act
+        subject.logonHandler(request, response, undefined, function() {
+          // Assert
+          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          var formcred_id = cookies[subject.FORMCRED_COOKIE];
+          expect(subject.formcred[formcred_id].status).to.equal(Model.FormCredStatus.bad_password);
+          done();
+        });
+      });
     });
   });
 
