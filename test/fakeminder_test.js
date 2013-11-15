@@ -450,7 +450,7 @@ describe('FakeMinder', function() {
       it('adds an SMSESSION cookie with a value of LOGGEDOFF to the response', function(done) {
         // Arrange
         request.url = '/system/logout';
-        request.fm_session = {};
+        request.fm_session;
 
         // Act
         subject.logoffHandler(request, response, function() {
