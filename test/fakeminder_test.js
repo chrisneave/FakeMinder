@@ -290,8 +290,10 @@ describe('FakeMinder', function() {
     });
 
     describe('and the request contains a FORMCRED cookie related to a valid login attempt', function() {
+      var formcred;
+
       beforeEach(function() {
-        var formcred = new Model.FormCred('fc123', new Model.User('bob'), Model.FormCredStatus.good_login);
+        formcred = new Model.FormCred('fc123', new Model.User('bob'), Model.FormCredStatus.good_login);
         subject.formcred[formcred.formcred_id] = formcred;
         request.setHeader('cookie', 'FORMCRED=' + formcred.formcred_id);
       });
@@ -352,23 +354,50 @@ describe('FakeMinder', function() {
           done();
         });
       });
+
+      it('destroys the formcred session', function(done) {
+        // Arrange
+        var session = new Model.Session('xyz', new Model.User('bob'));
+        subject.sessions[session.session_id] = session;
+
+        // Act
+        subject.protectedHandler(request, response, function() {
+          // Assert
+          expect(subject.formcred).to.not.have.key(formcred.formcred_id);
+          done();
+        });
+      });
     });
 
     describe('and the FORMCRED cookie maps to a bad login', function() {
-      it('responds with a redirect to the bad login URI', function() {
-        // Arrange
-        var user = new Model.User('bob');
-        var formcred = new Model.FormCred('fc123', user, Model.FormCredStatus.bad_login);
+      var user,
+          formcred;
+
+      beforeEach(function() {
+        user = new Model.User('bob');
+        formcred = new Model.FormCred('fc123', user, Model.FormCredStatus.bad_login);
         subject.formcred[formcred.formcred_id] = formcred;
         request.setHeader('cookie', 'FORMCRED=' + formcred.formcred_id);
         subject.config.users = [user];
+      });
 
+      it('responds with a redirect to the bad login URI', function() {
+        // Arrange
         // Act
         subject.protected(request, response);
 
         // Assert
         expect(response.statusCode).to.be(302);
         expect(response.headers['Location']).to.be(getTargetSiteUrl('bad_login'));
+      });
+
+      it('destroys the formcred session', function() {
+        // Arrange
+        // Act
+        subject.protectedHandler(request, response);
+
+        // Assert
+        expect(subject.formcred).to.not.have.key(formcred.formcred_id);
       });
     });
 
@@ -430,7 +459,15 @@ describe('FakeMinder', function() {
           expect(response.statusCode).to.be(302);
           expect(response.headers['Location']).to.be(getTargetSiteUrl('account_locked'));
         });
+      });
 
+      it('destroys the formcred session', function() {
+        // Arrange
+        // Act
+        subject.protectedHandler(request, response);
+
+        // Assert
+        expect(subject.formcred).to.not.have.key(formcred.formcred_id);
       });
     });
 
@@ -442,7 +479,19 @@ describe('FakeMinder', function() {
         // Act & assert
         subject.protected(request, response, done);
       });
-    })
+
+      it('destroys the formcred session', function() {
+        // Arrange
+        var user = new Model.User('bob');
+        var formcred = new Model.FormCred('fc123', user, Model.FormCredStatus.bad_password);
+
+        // Act
+        subject.protectedHandler(request, response);
+
+        // Assert
+        expect(subject.formcred).to.not.have.key(formcred.formcred_id);
+      });
+    });
   });
 
   describe('#logoff()', function() {
