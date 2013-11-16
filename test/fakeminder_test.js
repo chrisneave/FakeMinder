@@ -361,7 +361,7 @@ describe('FakeMinder', function() {
         subject.sessions[session.session_id] = session;
 
         // Act
-        subject.protectedHandler(request, response, function() {
+        subject.protected(request, response, function() {
           // Assert
           expect(subject.formcred).to.not.have.key(formcred.formcred_id);
           done();
@@ -394,7 +394,7 @@ describe('FakeMinder', function() {
       it('destroys the formcred session', function() {
         // Arrange
         // Act
-        subject.protectedHandler(request, response);
+        subject.protected(request, response);
 
         // Assert
         expect(subject.formcred).to.not.have.key(formcred.formcred_id);
@@ -464,7 +464,7 @@ describe('FakeMinder', function() {
       it('destroys the formcred session', function() {
         // Arrange
         // Act
-        subject.protectedHandler(request, response);
+        subject.protected(request, response);
 
         // Assert
         expect(subject.formcred).to.not.have.key(formcred.formcred_id);
@@ -486,7 +486,7 @@ describe('FakeMinder', function() {
         var formcred = new Model.FormCred('fc123', user, Model.FormCredStatus.bad_password);
 
         // Act
-        subject.protectedHandler(request, response);
+        subject.protected(request, response);
 
         // Assert
         expect(subject.formcred).to.not.have.key(formcred.formcred_id);
