@@ -74,14 +74,14 @@ describe('FakeMinder', function() {
     expect(subject.config).to.eql(json);
   });
 
-  describe('#sessionInitializer()', function() {
+  describe('#init()', function() {
     describe('when an SMSESSION cookie is not present', function() {
       it('sets fm_session to an empty object', function(done) {
         // Arrange
         var expected_value;
 
         // Act
-        subject.sessionInitializer(request, response, function() {
+        subject.init(request, response, function() {
           // Assert
           expect(request.fm_session).to.eql(expected_value);
           done();
@@ -96,7 +96,7 @@ describe('FakeMinder', function() {
         request.setHeader('cookie', 'SMSESSION=foo');
 
         // Act
-        subject.sessionInitializer(request, response, function() {
+        subject.init(request, response, function() {
           // Assert
           expect(request.fm_session).to.eql(expected_value);
           done();
@@ -112,7 +112,7 @@ describe('FakeMinder', function() {
         request.setHeader('cookie', 'SMSESSION=' + session.session_id);
 
         // Act
-        subject.sessionInitializer(request, response, function() {
+        subject.init(request, response, function() {
           // Assert
           expect(request.fm_session).to.equal(session);
         });
@@ -120,7 +120,7 @@ describe('FakeMinder', function() {
     });
   });
 
-  describe('#logonHandler()', function() {
+  describe('#logon()', function() {
     var post_data,
         target = 'http://localhost:8000/protected/home',
         user;
@@ -144,7 +144,7 @@ describe('FakeMinder', function() {
       it('redirects to the URI specified by the target URI', function(done) {
         // Arrange
         // Act
-        subject.logonHandler(request, response, undefined, function() {
+        subject.logon(request, response, undefined, function() {
           // Assert
           expect(response.statusCode).to.be(302);
           expect(response.headers['Location']).to.equal(target);
@@ -161,7 +161,7 @@ describe('FakeMinder', function() {
       it('sets a FORMCRED cookie that maps to a good login attempt', function(done) {
         // Arrange
         // Act
-        subject.logonHandler(request, response, undefined, function() {
+        subject.logon(request, response, undefined, function() {
           // Assert
           var cookies = cookie.parse(response.headers['set-cookie'][0]);
           var formcred_id = cookies[subject.FORMCRED_COOKIE];
@@ -175,7 +175,7 @@ describe('FakeMinder', function() {
         var expected = _.findWhere(subject.config.users, {'name': user});
 
         // Act
-        subject.logonHandler(request, response, undefined, function() {
+        subject.logon(request, response, undefined, function() {
           // Assert
           var cookies = cookie.parse(response.headers['set-cookie'][0]);
           var formcred_id = cookies[subject.FORMCRED_COOKIE];
@@ -191,7 +191,7 @@ describe('FakeMinder', function() {
         post_data = 'USERNAME=fred&PASSWORD=test1234&TARGET=' + target;
 
         // Act
-        subject.logonHandler(request, response, undefined, function() {
+        subject.logon(request, response, undefined, function() {
           // Assert
           var cookies = cookie.parse(response.headers['set-cookie'][0]);
           var formcred_id = cookies[subject.FORMCRED_COOKIE];
@@ -207,7 +207,7 @@ describe('FakeMinder', function() {
         post_data = 'USERNAME=' + user + '&PASSWORD=foobar1&TARGET=' + target;
 
         // Act
-        subject.logonHandler(request, response, undefined, function() {
+        subject.logon(request, response, undefined, function() {
           // Assert
           var cookies = cookie.parse(response.headers['set-cookie'][0]);
           var formcred_id = cookies[subject.FORMCRED_COOKIE];
@@ -218,7 +218,7 @@ describe('FakeMinder', function() {
     });
   });
 
-  describe('#protectedHandler()', function() {
+  describe('#protected()', function() {
     beforeEach(function() {
       // Arrange
       request.url = '/protected';
@@ -230,7 +230,7 @@ describe('FakeMinder', function() {
       it('redirects the user to the not_authenticated URL', function() {
         // Arrange
         // Act
-        subject.protectedHandler(request, response);
+        subject.protected(request, response);
 
         // Assert
         expect(response.statusCode).to.be(302);
@@ -252,7 +252,7 @@ describe('FakeMinder', function() {
 
       it('adds identity headers to the forwarded request', function(done) {
         // Act
-        subject.protectedHandler(request, response, function() {
+        subject.protected(request, response, function() {
           // Assert
           expect(request.headers['header1']).to.equal('auth1');
           expect(request.headers['header2']).to.equal('auth2');
@@ -263,7 +263,7 @@ describe('FakeMinder', function() {
 
       it('forwards the request to the proxy', function(done) {
         // Act
-        subject.protectedHandler(request, response, function() {
+        subject.protected(request, response, function() {
           // Assert
           done();
         });
@@ -281,7 +281,7 @@ describe('FakeMinder', function() {
         subject.sessions[session.session_id] = session;
 
         // Act
-        subject.protectedHandler(request, response);
+        subject.protected(request, response);
 
         // Assert
         expect(response.statusCode).to.be(302);
@@ -302,7 +302,7 @@ describe('FakeMinder', function() {
         subject.sessions[session.session_id] = session;
 
         // Act
-        subject.protectedHandler(request, response, function() {
+        subject.protected(request, response, function() {
           // Assert
           expect(subject.sessions).to.not.have.key(session.session_id);
           done();
@@ -314,7 +314,7 @@ describe('FakeMinder', function() {
         subject.sessions = {};
 
         // Act
-        subject.protectedHandler(request, response, function() {
+        subject.protected(request, response, function() {
           // Assert
           expect(findSession()).to.be.ok();
           done();
@@ -328,7 +328,7 @@ describe('FakeMinder', function() {
         var session_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
 
         // Act
-        subject.protectedHandler(request, response, function() {
+        subject.protected(request, response, function() {
           var session_expired_date = new Date(findSession().expiration);
           expect(session_expired_date.getFullYear()).to.equal(session_expiry.getFullYear());
           expect(session_expired_date.getMonth()).to.equal(session_expiry.getMonth());
@@ -347,7 +347,7 @@ describe('FakeMinder', function() {
         var session_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
 
         // Act
-        subject.protectedHandler(request, response, function() {
+        subject.protected(request, response, function() {
           expect(findSession().session_id).to.match(/^([0-9a-fA-F]{2}){16}$/);
           done();
         });
@@ -364,7 +364,7 @@ describe('FakeMinder', function() {
         subject.config.users = [user];
 
         // Act
-        subject.protectedHandler(request, response);
+        subject.protected(request, response);
 
         // Assert
         expect(response.statusCode).to.be(302);
@@ -388,7 +388,7 @@ describe('FakeMinder', function() {
         // Arrange
 
         // Act
-        subject.protectedHandler(request, response);
+        subject.protected(request, response);
 
         // Assert
         expect(response.statusCode).to.be(302);
@@ -399,7 +399,7 @@ describe('FakeMinder', function() {
         // Arrange
 
         // Act
-        subject.protectedHandler(request, response);
+        subject.protected(request, response);
 
         // Assert
         expect(subject.config.users[0].login_attempts).to.equal(1);
@@ -411,7 +411,7 @@ describe('FakeMinder', function() {
           user.login_attempts = 2;
 
           // Act
-          subject.protectedHandler(request, response);
+          subject.protected(request, response);
 
           // Assert
           expect(user.locked).to.be.ok();
@@ -424,7 +424,7 @@ describe('FakeMinder', function() {
           user.locked = true;
 
           // Act
-          subject.protectedHandler(request, response);
+          subject.protected(request, response);
 
           // Assert
           expect(response.statusCode).to.be(302);
@@ -440,12 +440,12 @@ describe('FakeMinder', function() {
         request.url = '/public';
 
         // Act & assert
-        subject.protectedHandler(request, response, done);
+        subject.protected(request, response, done);
       });
     })
   });
 
-  describe('#logoffHandler()', function() {
+  describe('#logoff()', function() {
     describe('when the logoff URI is requested', function() {
       it('adds an SMSESSION cookie with a value of LOGGEDOFF to the response', function(done) {
         // Arrange
@@ -453,7 +453,7 @@ describe('FakeMinder', function() {
         request.fm_session;
 
         // Act
-        subject.logoffHandler(request, response, function() {
+        subject.logoff(request, response, function() {
           var cookies = response.headers['set-cookie'];
 
           // Assert
@@ -470,7 +470,7 @@ describe('FakeMinder', function() {
         request.fm_session = session;
 
         // Act
-        subject.logoffHandler(request, response, function() {
+        subject.logoff(request, response, function() {
           // Assert
           expect(subject.sessions).to.not.have.key('session2');
           done();
@@ -482,11 +482,11 @@ describe('FakeMinder', function() {
     });
   });
 
-  describe('#sessionFinalizer()', function() {
+  describe('#end()', function() {
     it('adds an x-proxied-by header value to the request', function(done) {
       // Arrange
       // Act
-      subject.sessionFinalizer(request, response, function() {
+      subject.end(request, response, function() {
         // Assert
         expect(request.headers['x-proxied-by']).to.equal('localhost:8000');
         done();       
@@ -496,7 +496,7 @@ describe('FakeMinder', function() {
     it('adds an x-proxied-by header to the response', function(done) {
       // Arrange
       // Act
-      subject.sessionFinalizer(request, response, function() {
+      subject.end(request, response, function() {
         // Assert
         expect(response.headers['x-proxied-by']).to.equal('localhost:8000');
         done();       
@@ -513,7 +513,7 @@ describe('FakeMinder', function() {
       request.fm_session = session;
 
       // Act
-      subject.sessionFinalizer(request, response, function() {
+      subject.end(request, response, function() {
         var session_expired_date = new Date(subject.sessions[session.session_id].expiration);
         expected_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
 
