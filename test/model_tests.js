@@ -175,7 +175,7 @@ describe('Session', function() {
       expect(actual).to.equal(expected);
     });
 
-    it('returns \'false\' when the expiration property is equals the current date/time', function() {
+    it('returns \'false\' when the expiration property equals the current date/time', function() {
       // Arrange
       var actual;
       var expected = false;
