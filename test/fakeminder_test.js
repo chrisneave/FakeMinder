@@ -323,6 +323,18 @@ describe('FakeMinder', function() {
         });
       });
 
+      it('adds the new session to the request object', function(done) {
+        // Arrange
+        subject.sessions = {};
+
+        // Act
+        subject.protected(request, response, function() {
+          // Assert
+          expect(request.fm_session).to.be.equal(findSession());
+          done();
+        });
+      });
+
       it('sets the new session to expire after the configured timeout', function(done) {
         // Arrange
         subject.sessions = {};
