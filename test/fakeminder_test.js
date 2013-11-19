@@ -29,10 +29,6 @@ describe('FakeMinder', function() {
     };
     // Stubs for supporting cookie.js
     request['connection'] = { 'encrypted':false };
-    request['setHeader'] = function(header, value) {
-      this.headers = this.headers || {};
-      this.headers[header] = value;
-    };
     request['headers'] = {};
     response['headers'] = {};
     response['getHeader'] = function(header) {
@@ -93,7 +89,7 @@ describe('FakeMinder', function() {
       it('sets fm_session to an empty object', function(done) {
         // Arrange
         var expected_value;
-        request.setHeader('cookie', 'SMSESSION=foo');
+        request.headers['cookie'] = 'SMSESSION=foo';
 
         // Act
         subject.init(request, response, function() {
@@ -109,7 +105,7 @@ describe('FakeMinder', function() {
         // Arrange
         var session = new Model.Session();
         subject.sessions[session.session_id] = session;
-        request.setHeader('cookie', 'SMSESSION=' + session.session_id);
+        request.headers['cookie'] = 'SMSESSION=' + session.session_id;
 
         // Act
         subject.init(request, response, function() {
@@ -295,7 +291,7 @@ describe('FakeMinder', function() {
       beforeEach(function() {
         formcred = new Model.FormCred('fc123', new Model.User('bob'), Model.FormCredStatus.good_login);
         subject.formcred[formcred.formcred_id] = formcred;
-        request.setHeader('cookie', 'FORMCRED=' + formcred.formcred_id);
+        request.headers['cookie'] = 'FORMCRED=' + formcred.formcred_id;
       });
 
       it('destroys any existing session for the user', function(done) {
@@ -389,7 +385,7 @@ describe('FakeMinder', function() {
         user = new Model.User('bob');
         formcred = new Model.FormCred('fc123', user, Model.FormCredStatus.bad_login);
         subject.formcred[formcred.formcred_id] = formcred;
-        request.setHeader('cookie', 'FORMCRED=' + formcred.formcred_id);
+        request.headers['cookie'] = 'FORMCRED=' + formcred.formcred_id;
         subject.config.users = [user];
       });
 
@@ -421,7 +417,7 @@ describe('FakeMinder', function() {
         user = new Model.User('bob');
         formcred = new Model.FormCred('fc123', user, Model.FormCredStatus.bad_password);
         subject.formcred[formcred.formcred_id] = formcred;
-        request.setHeader('cookie', 'FORMCRED=' + formcred.formcred_id);
+        request.headers['cookie'] = 'FORMCRED=' + formcred.formcred_id;
         subject.config.users = [user];
       });
 
@@ -588,5 +584,23 @@ describe('FakeMinder', function() {
         done();
       });
     });
+
+    it('sets the SMSESSION cookie containing the ID of the current session', function(done) {
+      // Arrange
+      var session = new Model.Session();
+      session.user = new Model.User('bob');
+      subject.sessions[session.session_id] = session;
+      request.fm_session = session;
+
+      // Act
+      subject.end(request, response, function() {
+        // Assert
+        var cookies = response.headers['set-cookie'];
+
+        // Assert
+        expect(cookies[0]).to.contain('SMSESSION=' + session.session_id);
+        done();
+      });
+    })
   });
 });
