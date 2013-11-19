@@ -458,7 +458,7 @@ describe('FakeMinder', function() {
       describe('and the user has exceeded the maximum number of login attempts', function() {
         it('locks the user\'s account', function() {
           // Arrange
-          user.login_attempts = 2;
+          user.login_attempts = 3;
 
           // Act
           subject.protected(request, response);
