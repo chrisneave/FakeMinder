@@ -35,6 +35,9 @@ app.get(fakeminder_config.target_site.urls.protected, routes.protected);
 app.get('/public/logon', routes.logon);
 app.get(fakeminder_config.target_site.urls.logoff, routes.logoff);
 app.get(fakeminder_config.target_site.urls.not_authenticated, routes.not_authenticated);
+app.get(fakeminder_config.target_site.urls.bad_login, routes.bad_login);
+app.get(fakeminder_config.target_site.urls.bad_password, routes.bad_password);
+app.get(fakeminder_config.target_site.urls.account_locked, routes.account_locked);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
