@@ -179,6 +179,19 @@ describe('FakeMinder', function() {
           done();
         });
       });
+
+      it('resets the login_attempts for the user back to zero', function(done) {
+        // Arrange
+        var expected = _.findWhere(subject.config.users, {'name': user});
+        expected.login_attempts = 2;
+
+        // Act
+        subject.logon(request, response, undefined, function() {
+          // Assert
+          expect(expected.login_attempts).to.equal(0);
+          done();
+        });
+      });
     });
 
     describe('and the USERNAME is not valid', function() {
