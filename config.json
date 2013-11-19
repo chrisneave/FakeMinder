@@ -5,6 +5,7 @@
 	},
 	"siteminder": {
 		"sm_cookie": "SMSESSION",
+    "formcred_cookie": "FORMCRED",
 		"userid_field": "USERNAME",
 		"password_field": "PASSWORD",
 		"target_field": "TARGET",
