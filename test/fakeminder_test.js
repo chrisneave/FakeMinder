@@ -36,6 +36,9 @@ describe('FakeMinder', function() {
       return this.headers[header];
     };
     response['end'] = function() {};
+    response['write'] = function(content) {
+      this['body'] = content;
+    }
   });
 
   var findSession = function(sessions) {
@@ -151,6 +154,40 @@ describe('FakeMinder', function() {
 
     describe('and the target URI does not belong to the site being proxied', function() {
       it('{determine what the correct behavior is}');
+    });
+
+    describe('and the smagentname field is specified in config', function() {
+      describe('and the form does not contain a matching smagentname value', function() {
+        it('returns a 400 response', function(done) {
+          // Arrange
+          subject.config.siteminder.smagentname = "custom_agent";
+          post_data = 'USERNAME=' + user + '&PASSWORD=test1234&TARGET=' + target + "&SMAGENTNAME=blah";
+
+          // Act
+          subject.logon(request, response, undefined, function() {
+            // Assert
+            expect(response.statusCode).to.be(400);
+            expect(response.body).to.equal('SMAGENTNAME of "custom_agent" not supplied in logon POST data.');
+            done();
+          });
+        });
+      });
+
+      describe('and the form does not contain a an smagentname value', function() {
+        it('returns a 400 response', function(done) {
+          // Arrange
+          subject.config.siteminder.smagentname = "custom_agent";
+          post_data = 'USERNAME=' + user + '&PASSWORD=test1234&TARGET=' + target;
+
+          // Act
+          subject.logon(request, response, undefined, function() {
+            // Assert
+            expect(response.statusCode).to.be(400);
+            expect(response.body).to.equal('SMAGENTNAME of "custom_agent" not supplied in logon POST data.');
+            done();
+          });
+        });
+      });
     });
 
     describe('and the USERNAME and PASSWORD are valid', function() {
