@@ -1,7 +1,10 @@
 {
 	"proxy": {
-		"port": 8000,
-		"set_x_proxied_by": true
+    "url": "http://localhost:8000",
+		"set_x_proxied_by": true,
+    "pathnames": {
+      "logon": "/public/siteminderagent/login.fcc"
+    }
 	},
 	"siteminder": {
 		"sm_cookie": "SMSESSION",
@@ -14,11 +17,8 @@
     "smagentname": ""
 	},
   "target_site": {
-    "host": "localhost",
-    "port": 4567,
-    "root": "http://localhost:8000",
-    "urls": {
-      "logon": "/public/siteminderagent/login.fcc",
+    "url": "http://localhost:4567",
+    "pathnames": {
       "logoff": "/system/logout",
       "not_authenticated": "/system/error/notauthenticated",
       "bad_login": "/system/error/badlogin",

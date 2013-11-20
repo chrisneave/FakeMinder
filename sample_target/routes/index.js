@@ -3,8 +3,8 @@ var url = require('url');
 exports.index = function(req, res) {
   res.render('index', {
     title: 'Sample Target App',
-    logoff_url: fakeminder_config.target_site.urls.logoff,
-    protected_url: fakeminder_config.target_site.urls.protected
+    logoff_url: fakeminder_config.target_site.pathnames.logoff,
+    protected_url: fakeminder_config.target_site.pathnames.protected
   });
 };
 
@@ -17,8 +17,8 @@ exports.protected = function(req, res) {
 exports.logon = function(req, res) {
   res.render('logon', {
     title: 'Login',
-    target: url.resolve(fakeminder_config.target_site.root, fakeminder_config.target_site.urls.protected),
-    sm_login: fakeminder_config.target_site.urls.logon
+    target: url.resolve(fakeminder_config.target_site.url, fakeminder_config.target_site.pathnames.protected),
+    sm_login: fakeminder_config.proxy.pathnames.logon
   });
 };
 

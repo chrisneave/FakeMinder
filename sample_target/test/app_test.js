@@ -1,11 +1,12 @@
 var fs = require('fs'),
     json = fs.read('./config.json', 'utf8'),
     fakeminder_config = JSON.parse(json),
-    base_url = fakeminder_config.target_site.root,
-    homepage_url = base_url + '/',
+    proxy_url = fakeminder_config.proxy.url,
+    target_url = fakeminder_config.target_site.url,
+    homepage_url = proxy_url + '/',
     logon_url = '/public/logon',
-    protected_url = base_url + fakeminder_config.target_site.urls.protected,
-    logoff_url = base_url + fakeminder_config.target_site.urls.logoff;
+    protected_url = proxy_url + fakeminder_config.target_site.pathnames.protected,
+    logoff_url = proxy_url + fakeminder_config.target_site.pathnames.logoff;
 
 /*
  * Homepage
@@ -13,8 +14,8 @@ var fs = require('fs'),
 casper.test.begin('Verify homepage', 4, function suite(test) {
   casper.start(homepage_url, function() {
     test.assertHttpStatus(200);
-    test.assertExists('a[href="' + fakeminder_config.target_site.urls.logoff + '"]', 'Has a link to the logoff page');
-    test.assertExists('a[href="' + fakeminder_config.target_site.urls.protected + '"]', 'Has a link to the protected folder');
+    test.assertExists('a[href="' + fakeminder_config.target_site.pathnames.logoff + '"]', 'Has a link to the logoff page');
+    test.assertExists('a[href="' + fakeminder_config.target_site.pathnames.protected + '"]', 'Has a link to the protected folder');
     test.assertExists('a[href="/public/logon"]', 'Has a link to the login page');
   });
 
@@ -30,7 +31,7 @@ casper.test.begin('Verify logoff page', 3, function suite(test) {
   casper.start(homepage_url);
 
   casper.then(function() {
-    this.click('a[href="' + fakeminder_config.target_site.urls.logoff + '"]');
+    this.click('a[href="' + fakeminder_config.target_site.pathnames.logoff + '"]');
   });
 
   casper.then(function() {
@@ -51,7 +52,7 @@ casper.test.begin('Verify protected page', 3, function suite(test) {
   casper.start(homepage_url);
 
   casper.then(function() {
-    this.click('a[href="' + fakeminder_config.target_site.urls.protected + '"]');
+    this.click('a[href="' + fakeminder_config.target_site.pathnames.protected + '"]');
   });
 
   casper.then(function() {
@@ -90,7 +91,7 @@ casper.test.begin('Verify login page', 3, function suite(test) {
  * Login with valid credentials
  */
 casper.test.begin('Login with valid credentials', 6, function suite(test) {
-  casper.start(base_url + logon_url);
+  casper.start(proxy_url + logon_url);
 
   casper.then(function() {
     this.fill('form#logonform', {
@@ -120,7 +121,7 @@ casper.test.begin('Login with valid credentials', 6, function suite(test) {
  * Login with an invalid user ID
  */
 casper.test.begin('Login with an invalid user ID', 2, function suite(test) {
-  casper.start(base_url + logon_url);
+  casper.start(proxy_url + logon_url);
 
   casper.then(function() {
     this.fill('form#logonform', {
@@ -144,7 +145,7 @@ casper.test.begin('Login with an invalid user ID', 2, function suite(test) {
  * Login with an invalid password
  */
 casper.test.begin('Login with an invalid password', 2, function suite(test) {
-  casper.start(base_url + logon_url);
+  casper.start(proxy_url + logon_url);
 
   casper.then(function() {
     this.fill('form#logonform', {
@@ -168,7 +169,7 @@ casper.test.begin('Login with an invalid password', 2, function suite(test) {
  * Lockout account
  */
 casper.test.begin('View the account lockout page after three login attempts', 7, function suite(test) {
-  casper.start(base_url + logon_url);
+  casper.start(proxy_url + logon_url);
 
   casper.then(function() {
     this.fill('form#logonform', {
@@ -183,7 +184,7 @@ casper.test.begin('View the account lockout page after three login attempts', 7,
     test.assertTitle('Bad Password');
   });
 
-  casper.thenOpen(base_url + logon_url);
+  casper.thenOpen(proxy_url + logon_url);
 
   casper.then(function() {
     this.fill('form#logonform', {
@@ -198,7 +199,7 @@ casper.test.begin('View the account lockout page after three login attempts', 7,
     test.assertTitle('Bad Password');
   });
 
-  casper.thenOpen(base_url + logon_url);
+  casper.thenOpen(proxy_url + logon_url);
 
   casper.then(function() {
     this.fill('form#logonform', {

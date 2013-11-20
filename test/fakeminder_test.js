@@ -56,7 +56,7 @@ describe('FakeMinder', function() {
   };
 
   var getTargetSiteUrl = function(url_type) {
-    return subject.config.target_site.urls[url_type];
+    return subject.config.target_site.pathnames[url_type];
   }
 
   it('parses the config.json file and writes it to the config property', function() {
@@ -73,7 +73,7 @@ describe('FakeMinder', function() {
     expect(subject.config).to.eql(json);
   });
 
-  describe('#init()', function() {
+  describe('init()', function() {
     describe('when an SMSESSION cookie is not present', function() {
       it('sets fm_session to an empty object', function(done) {
         // Arrange
@@ -119,13 +119,13 @@ describe('FakeMinder', function() {
     });
   });
 
-  describe('#logon()', function() {
+  describe('logon()', function() {
     var post_data,
         target = 'http://localhost:8000/protected/home',
         user;
 
     beforeEach(function() {
-      request.url = subject.config.target_site.urls.logon;
+      request.url = subject.config.target_site.pathnames.logon;
       request.method = 'POST';
       user = 'bob'
       post_data = 'USERNAME=' + user + '&PASSWORD=test1234&TARGET=' + target;
@@ -264,7 +264,7 @@ describe('FakeMinder', function() {
     });
   });
 
-  describe('#protected()', function() {
+  describe('protected()', function() {
     beforeEach(function() {
       // Arrange
       request.url = '/protected';
@@ -552,7 +552,7 @@ describe('FakeMinder', function() {
     });
   });
 
-  describe('#logoff()', function() {
+  describe('logoff()', function() {
     describe('when the logoff URI is requested', function() {
       it('adds an SMSESSION cookie with a value of LOGGEDOFF to the response', function(done) {
         // Arrange
@@ -589,24 +589,58 @@ describe('FakeMinder', function() {
     });
   });
 
-  describe('#end()', function() {
-    it('adds an x-proxied-by header value to the request', function(done) {
-      // Arrange
-      // Act
-      subject.end(request, response, function() {
-        // Assert
-        expect(request.headers['x-proxied-by']).to.equal('localhost:8000');
-        done();       
+  describe('end()', function() {
+    describe('if set_x_proxied_by is set to true', function() {
+      it('adds an x-proxied-by header value to the request', function(done) {
+        // Arrange
+        subject.config.proxy.url = 'http://somehost:3245';
+        subject.config.proxy.set_x_proxied_by = true;
+
+        // Act
+        subject.end(request, response, function() {
+          // Assert
+          expect(request.headers['x-proxied-by']).to.equal('somehost:3245');
+          done();       
+        });
+      });
+
+      it('adds an x-proxied-by header to the response', function(done) {
+        // Arrange
+        subject.config.proxy.url = 'http://somehost:3245';
+        subject.config.proxy.set_x_proxied_by = true;
+
+        // Act
+        subject.end(request, response, function() {
+          // Assert
+          expect(response.headers['x-proxied-by']).to.equal('somehost:3245');
+          done();       
+        });
       });
     });
 
-    it('adds an x-proxied-by header to the response', function(done) {
-      // Arrange
-      // Act
-      subject.end(request, response, function() {
-        // Assert
-        expect(response.headers['x-proxied-by']).to.equal('localhost:8000');
-        done();       
+    describe('if set_x_proxied_by is set to false', function() {
+      it('does not add an x-proxied-by header value to the request', function(done) {
+        // Arrange
+        subject.config.proxy.set_x_proxied_by = false;
+
+        // Act
+        subject.end(request, response, function() {
+          // Assert
+          expect(response.headers).to.not.have.key('x-proxied-by');
+          done();       
+        });
+      });
+
+      it('does not add an x-proxied-by header to the response', function(done) {
+        // Arrange
+        subject.config.proxy.set_x_proxied_by = false;
+
+        // Act
+        subject.end(request, response, function() {
+          // Assert
+          expect(response.headers).to.not.have.key('x-proxied-by');
+          done();       
+        });
       });
     });
     
@@ -653,4 +687,18 @@ describe('FakeMinder', function() {
       });
     })
   });
+
+  describe('rewriteResponse()', function() {
+    it('rewrites the Location header to match that of the proxy server', function() {
+      // Arrange
+      response.headers['Location'] = subject.config.target_site.url;
+      var expected = subject.config.proxy.url;
+
+      // Act
+      subject.rewriteResponse(response);
+
+      // Assert
+      expect(response.headers['Location']).to.equal(expected);
+    });
+  })
 });
