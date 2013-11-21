@@ -1,7 +1,7 @@
 {
   "name": "fakeminder",
   "version": "0.0.1",
-  "description": "Fake implementation of CA SiteMinder to use for developer testing",
+  "description": "Fake or mock implementation of CA SiteMinder to use for developer testing",
   "main": "main.js",
   "scripts": {
     "run": "clear && node main.js",
@@ -26,12 +26,12 @@
     "http-proxy": "0.10.x",
     "cookies": "0.3.x",
     "express": "3.x",
-    "ejs": "x",
-    "underscore": "x"
+    "ejs": "0.8.x",
+    "underscore": "1.5.x"
   },
   "devDependencies": {
-    "mocha": "x",
-    "expect.js": "x",
-    "cookie": "~0.1.0"
+    "mocha": "1.x",
+    "expect.js": "0.x",
+    "cookie": "0.x"
   }
 }
