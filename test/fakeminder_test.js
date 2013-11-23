@@ -268,7 +268,11 @@ describe('FakeMinder', function() {
     beforeEach(function() {
       // Arrange
       request.url = '/protected';
-      var user_bob = new Model.User('bob', 'test1234', {'header1':'auth1', 'header2':'auth2', 'header3':'auth3'});
+      var user_bob = new Model.User({
+        'name': 'bob',
+        'password': 'test1234',
+        'auth_headers': {'header1':'auth1', 'header2':'auth2', 'header3':'auth3'}
+      });
       subject.config.users[user_bob.name] = user_bob;
     });
 
@@ -288,7 +292,11 @@ describe('FakeMinder', function() {
       beforeEach(function() {
         var now = new Date();
         var sessionExpiry = new Date(now.getTime() + 10 * 60000);
-        var session = new Model.Session('xyz', new Model.User('bob'), sessionExpiry.toJSON());
+        var session = new Model.Session({
+          'session_id': 'xyz',
+          'user': new Model.User({'name': 'bob'}),
+          'expiration': sessionExpiry.toJSON()
+        });
         request.fm_session = session;
         session.user.auth_headers['header1'] = 'auth1';
         session.user.auth_headers['header2'] = 'auth2';
@@ -322,7 +330,11 @@ describe('FakeMinder', function() {
         request.url = '/protected';
         var now = new Date();
         var sessionExpiry = new Date(now.getTime() - 120 * 60000);
-        var session = new Model.Session('xyz', new Model.User('bob'), sessionExpiry.toJSON());
+        var session = new Model.Session({
+          'session_id': 'xyz',
+          'user': new Model.User({'name': 'bob'}),
+          'expiration': sessionExpiry.toJSON()
+        });
         request.fm_session = session;
         subject.sessions[session.session_id] = session;
 
@@ -339,14 +351,21 @@ describe('FakeMinder', function() {
       var formcred;
 
       beforeEach(function() {
-        formcred = new Model.FormCred('fc123', new Model.User('bob'), Model.FormCredStatus.good_login);
+        formcred = new Model.FormCred({
+          'formcred_id': 'fc123',
+          'user': new Model.User({'name': 'bob'}),
+          'status': Model.FormCredStatus.good_login
+        });
         subject.formcred[formcred.formcred_id] = formcred;
         request.headers['cookie'] = 'FORMCRED=' + formcred.formcred_id;
       });
 
       it('destroys any existing session for the user', function(done) {
         // Arrange
-        var session = new Model.Session('xyz', new Model.User('bob'));
+        var session = new Model.Session({
+          'session_id': 'xyz',
+          'user': new Model.User({'name': 'bob'})
+        });
         subject.sessions[session.session_id] = session;
 
         // Act
@@ -397,7 +416,7 @@ describe('FakeMinder', function() {
           expect(session_expired_date.getMinutes()).to.equal(session_expiry.getMinutes());
           expect(session_expired_date.getSeconds()).to.equal(session_expiry.getSeconds());
           done();
-        });
+        }, {now: now});
       });
 
       it('creates a new session with a 16 byte hexadecimal string session_id value', function(done) {
@@ -415,7 +434,10 @@ describe('FakeMinder', function() {
 
       it('destroys the formcred session', function(done) {
         // Arrange
-        var session = new Model.Session('xyz', new Model.User('bob'));
+        var session = new Model.Session({
+          'session_id': 'xyz',
+          'user': new Model.User({'name':' bob'})
+        });
         subject.sessions[session.session_id] = session;
 
         // Act
@@ -432,8 +454,12 @@ describe('FakeMinder', function() {
           formcred;
 
       beforeEach(function() {
-        user = new Model.User('bob');
-        formcred = new Model.FormCred('fc123', user, Model.FormCredStatus.bad_login);
+        user = new Model.User({'name': 'bob'});
+        formcred = new Model.FormCred({
+          'formcred_id': 'fc123',
+          'user': user,
+          'status': Model.FormCredStatus.bad_login
+        });
         subject.formcred[formcred.formcred_id] = formcred;
         request.headers['cookie'] = 'FORMCRED=' + formcred.formcred_id;
         subject.config.users = [user];
@@ -464,8 +490,12 @@ describe('FakeMinder', function() {
           formcred;
 
       beforeEach(function() {
-        user = new Model.User('bob');
-        formcred = new Model.FormCred('fc123', user, Model.FormCredStatus.bad_password);
+        user = new Model.User({'name': 'bob'});
+        formcred = new Model.FormCred({
+          'formcred_id': 'fc123',
+          'user': user,
+          'status': Model.FormCredStatus.bad_password
+        });
         subject.formcred[formcred.formcred_id] = formcred;
         request.headers['cookie'] = 'FORMCRED=' + formcred.formcred_id;
         subject.config.users = [user];
@@ -540,8 +570,12 @@ describe('FakeMinder', function() {
 
       it('destroys the formcred session', function() {
         // Arrange
-        var user = new Model.User('bob');
-        var formcred = new Model.FormCred('fc123', user, Model.FormCredStatus.bad_password);
+        var user = new Model.User({'name': 'bob'});
+        var formcred = new Model.FormCred({
+          'formcred_id': 'fc123',
+          'user': user,
+          'status': Model.FormCredStatus.bad_password
+        });
 
         // Act
         subject.protected(request, response);
@@ -572,7 +606,7 @@ describe('FakeMinder', function() {
       it('removes the existing session corresponding to the SMSESSION cookie value', function(done) {
         // Arrange
         request.url = '/system/logout';
-        var session = new Model.Session('session2');
+        var session = new Model.Session({'session_id': 'session2'});
         subject.sessions = {'session1':{}, 'session2':session, 'session3':{}};
         request.fm_session = session;
 
@@ -648,8 +682,7 @@ describe('FakeMinder', function() {
       // Arrange
       var now = new Date();
       var expected_expiry;
-      var session = new Model.Session();
-      session.user = new Model.User('bob');
+      var session = new Model.Session({'user': new Model.User({'name': 'bob'}), 'now': now});
       subject.sessions[session.session_id] = session;
       request.fm_session = session;
 
@@ -671,8 +704,7 @@ describe('FakeMinder', function() {
 
     it('sets the SMSESSION cookie containing the ID of the current session', function(done) {
       // Arrange
-      var session = new Model.Session();
-      session.user = new Model.User('bob');
+      var session = new Model.Session({'user': new Model.User({'name': 'bob'})});
       subject.sessions[session.session_id] = session;
       request.fm_session = session;
 

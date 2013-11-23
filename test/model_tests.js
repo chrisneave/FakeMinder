@@ -9,7 +9,7 @@ describe('User', function() {
       var expected = 'bob';
 
       // Act
-      subject = new Model.User(expected);
+      subject = new Model.User({'name': expected});
 
       // Assert
       expect(subject.name).to.equal(expected);
@@ -21,7 +21,7 @@ describe('User', function() {
       var expected = 'test1234';
 
       // Act
-      subject = new Model.User('', expected);
+      subject = new Model.User({'password': expected});
 
       // Assert
       expect(subject.password).to.equal(expected);
@@ -33,7 +33,7 @@ describe('User', function() {
       var expected = {'header_1':'key_c', 'header_2':'key_b', 'header_3':'key_a'};
 
       // Act
-      subject = new Model.User('', '', expected);
+      subject = new Model.User({'auth_headers': expected});
 
       // Assert
       expect(subject.auth_headers).to.equal(expected);
@@ -45,7 +45,7 @@ describe('User', function() {
       var expected = {};
 
       // Act
-      subject = new Model.User('', '');
+      subject = new Model.User();
 
       // Assert
       expect(subject.auth_headers).to.eql(expected);
@@ -57,7 +57,7 @@ describe('User', function() {
       var expected = 0;
 
       // Act
-      subject = new Model.User('', '');
+      subject = new Model.User();
 
       // Assert
       expect(subject.login_attempts).to.eql(expected);
@@ -69,7 +69,7 @@ describe('User', function() {
       var expected = false;
 
       // Act
-      subject = new Model.User('', '');
+      subject = new Model.User();
 
       // Assert
       expect(subject.locked).to.eql(expected);
@@ -85,7 +85,7 @@ describe('Session', function() {
       var expected = 'session_123';
 
       // Act
-      subject = new Model.Session(expected);
+      subject = new Model.Session({'session_id': expected});
 
       // Assert
       expect(subject.session_id).to.equal(expected);
@@ -108,7 +108,7 @@ describe('Session', function() {
           expected = new Model.User('bob', 'test1234', {});
 
       // Act
-      subject = new Model.Session('session_123', expected);
+      subject = new Model.Session({'session_id': 'session_123', 'user': expected});
 
       // Assert
       expect(subject.user).to.equal(expected);
@@ -120,7 +120,7 @@ describe('Session', function() {
           expected = new Date();
 
       // Act
-      subject = new Model.Session('', {}, expected);
+      subject = new Model.Session({'expiration': expected});
 
       // Assert
       expect(subject.expiration).to.equal(expected);
@@ -132,7 +132,7 @@ describe('Session', function() {
       // Arrange
       var now = new Date();
       var expected = new Date(now.getTime() + 20 * 60000);
-      var subject = new Model.Session();
+      var subject = new Model.Session({'now': now});
 
       // Act
       subject.resetExpiration(20);
@@ -200,7 +200,7 @@ describe('FormCred', function() {
       var expected = 'formcred_123';
 
       // Act
-      subject = new Model.FormCred(expected);
+      subject = new Model.FormCred({'formcred_id': expected});
 
       // Assert
       expect(subject.formcred_id).to.equal(expected);
@@ -223,7 +223,7 @@ describe('FormCred', function() {
           expected = new Model.User('bob', 'test1234', {});
 
       // Act
-      subject = new Model.FormCred('session_123', expected);
+      subject = new Model.FormCred({'user': expected});
 
       // Assert
       expect(subject.user).to.equal(expected);
@@ -235,7 +235,7 @@ describe('FormCred', function() {
           expected = 'GOOD_CREDS';
 
       // Act
-      subject = new Model.FormCred('', {}, expected);
+      subject = new Model.FormCred({'status': expected});
 
       // Assert
       expect(subject.status).to.equal(expected);
