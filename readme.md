@@ -1,12 +1,46 @@
 # FakeMinder
 
-A fake implementation of CA SiteMinder to enable easy development against SiteMinder in a non-SiteMinder enabled test environment.
+A fake implementation of CA's SiteMinder product that enables easy development of your SiteMinder integrated application without installing SiteMinder on your development environment.
+
+Runs as a reverse proxy using the fabulous node-http-proxy library and injects custom logic to protect a target site, handle login and manage SM session state.
 
 ## Motivation
 
-My own desire to mock SiteMinder to test my own custom implementations of login and change password changes.
+Because testing an application that integrates with SiteMinder is hard if you cannot deploy SiteMinder to all of your development and test environments.
+
+Because this is my first Node.js project and it seemed like a good fit for learning Node!
+
+*DISCLAIMER*
+This software is in no way affiliated with or intends to be a representation of SiteMinder. Its intended use is limited to a mock version of the application for testing purposes only. This software does not intend to replicate any production ready functionality found in SiteMinder.
+
+## Features
+
+### Block access to a protected folder
+
+- Configure protected folder in config.json.
+- Validate presence of SMSESSION cookie.
+- Redirect to configured URL for custom authentication error handling.
+
+### Authentication
+
+- Intercept and handle POST requests to a configured login FCC.
+- Redirect to the TARGET after credential validation.
+- Assign a FORMCRED cookie to track credential validation results.
+- Redirect custom URLs for handling login failures.
+
+## Other Behaviors
+
+- Re-writes URLs in Location headers when the target application sends a 302 redirect to the client.
+
+## Coming Soon
+
+- Support for change password logic using smpwservices.fcc.
 
 ## Installation
+
+1. Clone this repository.
+2. Install package dependencies using: `npm install`
+3. Start the server using: `node main.js`
 
 ## Running Tests
 
@@ -22,45 +56,6 @@ Then execute the npm script *coverage* using the following command:
 
 The results of the coverage test run will now be displayed in your default browser.
 
-### Block access to protected URI
+## Contributing
 
-Configure protected URI
-Check for SMSESSION cookie
-Redirect to configured URI for authentication failure.
-
-### Authentication
-
-Accept form post containing:
-- USER
-- PASSWORD
-- TARGET
-Validate USER and PASSWORD against configured user.
-Redirect to TARGET. Repond with 302.
-Assign SMSESSION cookie and track against user.
-
-### Allow access to protected URI
-
-Configure protected URI
-Check for SMSESSION cookie
-Assign HTTP headers mapped to user's identity.
-Forward request to protected site.
-
-### Redirect on change temporary password
-
-Accept form post containing:
-- USER
-- PASSWORD
-- TARGET
-Validate USER and PASSWORD against configured user.
-Redirect to TARGET URL.
-Detect temporary password.
-Redirect to configured change password URL.
-
-### Accept change password request
-
-Accept form post containing:
-- USERNAME
-- PASSWORD
-- NEWPASSWORD
-- CONFIRMATION
-Validate form post values and redirect to TARGET.
+I'm not actively looking for contributions but if you feel there can be improvements made or you find  a bug please fork and submit a pull request.
