@@ -38,11 +38,49 @@ This software is in no way affiliated with or intends to be a representation of 
 
 ## Installation
 
-1. Clone this repository.
-2. Install package dependencies using: `npm install`
-3. Start the server using: `node main.js`
+`npm install fakeminder -g`
+
+It is preferable to install the package to your global store so you can use the command line interface.
+
+## Usage
+
+### Viewing help
+
+View command line help using:
+
+`fakeminder --help`
+
+or
+
+`fakeminder -h`
+
+### Starting a new instance of the server
+
+Start an instance of the server using:
+
+`fakeminder start <config_file>`
+
+Where `<config_file>` is the configuration file to use. Defaults to using the config.json in the project root folder.
+
+### Creating a new configuration file from the command line
+
+Use a series of command line prompts to create a new configuration file using:
+
+`fakeminder create`
+
+Follow the instructions onscreen and FakeMinder will save the results to a new configuration JSON file.
 
 ## Running Tests
+
+Unit tests are written using Mocha and can be run using the standard command:
+
+`mocha`
+
+Integration tests are executed using PhantomJS and CasperJS.
+
+1. Start FakeMinder using: `node main.js`
+2. Start the sample app using: `npm run-script run-sample`
+3. Execute the tests using: `casperjs test ./sample_target/test/*.js`
 
 ## Code Coverage
 
@@ -58,4 +96,4 @@ The results of the coverage test run will now be displayed in your default brows
 
 ## Contributing
 
-I'm not actively looking for contributions but if you feel there can be improvements made or you find  a bug please fork and submit a pull request.
+I'm not actively looking for contributions but if you feel there can be improvements made or you find  a bug please fork and submit a pull request. For bugs please also raise an issue on the Github project site.

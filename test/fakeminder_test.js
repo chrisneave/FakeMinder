@@ -14,11 +14,8 @@ describe('FakeMinder', function() {
       response;
 
   beforeEach(function() {
-    subject = new FakeMinder();
+    subject = new FakeMinder('config.json');
     emptySession = { 'user':'' };
-    var json = fs.readFileSync(__dirname + '/../config.json', 'utf8');
-    subject.config = JSON.parse(json);
-
     request = {};
     response = {};
     request['method'] = 'GET';
@@ -67,7 +64,7 @@ describe('FakeMinder', function() {
     json = JSON.parse(json);
 
     // Act
-    subject = new FakeMinder();
+    subject = new FakeMinder('config.json');
 
     // Assert
     expect(subject.config).to.eql(json);

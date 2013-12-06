@@ -2,7 +2,10 @@
   "name": "fakeminder",
   "version": "0.0.1",
   "description": "Fake or mock implementation of CA SiteMinder to use for developer testing",
-  "main": "main.js",
+  "bin": {
+    "fakeminder": "bin/fakeminder"
+  },
+  "preferGlobal": true,
   "scripts": {
     "run": "clear && node main.js",
     "test": "clear && mocha -R spec",
@@ -27,7 +30,9 @@
     "cookies": "0.3.x",
     "express": "3.x",
     "ejs": "0.8.x",
-    "underscore": "1.5.x"
+    "underscore": "1.5.x",
+    "commander": "~2.1.0",
+    "inquirer": "~0.3.5"
   },
   "devDependencies": {
     "mocha": "1.x",
