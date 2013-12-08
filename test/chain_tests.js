@@ -53,7 +53,7 @@ describe('Chain', function() {
         i++;
         result.push(i);
         done();
-      }
+      };
       subject['queue'] = [foo, foo, foo];
 
       // Act

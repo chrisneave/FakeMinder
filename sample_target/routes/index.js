@@ -1,4 +1,9 @@
-var url = require('url');
+var url = require('url'),
+    fakeminder_config;
+
+exports.init = function(config) {
+  fakeminder_config = config;
+};
 
 exports.index = function(req, res) {
   res.render('index', {

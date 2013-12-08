@@ -1,4 +1,4 @@
-var expect = require('expect.js')
+var expect = require('expect.js'),
     Model = require('../lib/model.js');
 
 describe('User', function() {
@@ -73,7 +73,7 @@ describe('User', function() {
 
       // Assert
       expect(subject.locked).to.eql(expected);
-    })
+    });
   });
 });
 

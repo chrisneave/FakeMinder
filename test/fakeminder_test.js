@@ -35,7 +35,7 @@ describe('FakeMinder', function() {
     response['end'] = function() {};
     response['write'] = function(content) {
       this['body'] = content;
-    }
+    };
   });
 
   var findSession = function(sessions) {
@@ -54,12 +54,11 @@ describe('FakeMinder', function() {
 
   var getTargetSiteUrl = function(url_type) {
     return subject.config.target_site.pathnames[url_type];
-  }
+  };
 
   it('parses the config.json file and writes it to the config property', function() {
     // Arrange
     var file = __dirname + '/../config.json';
-    var json;
     var json = fs.readFileSync(file, 'utf8');
     json = JSON.parse(json);
 
@@ -97,7 +96,7 @@ describe('FakeMinder', function() {
           expect(request.fm_session).to.eql(expected_value);
           done();
         });
-      })
+      });
     });
 
     describe('when an SMSESSION is present and matches an existing session', function() {
@@ -124,7 +123,7 @@ describe('FakeMinder', function() {
     beforeEach(function() {
       request.url = subject.config.target_site.pathnames.logon;
       request.method = 'POST';
-      user = 'bob'
+      user = 'bob';
       post_data = 'USERNAME=' + user + '&PASSWORD=test1234&TARGET=' + target;
       request.on = function(event, callback) {
         if (event === 'data') {
@@ -133,7 +132,7 @@ describe('FakeMinder', function() {
         if (event === 'end') {
           callback();
         }
-      }
+      };
     });
 
     describe('and the target URI belongs to the site being proxied', function() {
@@ -588,7 +587,6 @@ describe('FakeMinder', function() {
       it('adds an SMSESSION cookie with a value of LOGGEDOFF to the response', function(done) {
         // Arrange
         request.url = '/system/logout';
-        request.fm_session;
 
         // Act
         subject.logoff(request, response, function() {
@@ -714,7 +712,7 @@ describe('FakeMinder', function() {
         expect(cookies[0]).to.contain('SMSESSION=' + session.session_id);
         done();
       });
-    })
+    });
   });
 
   describe('rewriteResponse()', function() {
@@ -729,5 +727,5 @@ describe('FakeMinder', function() {
       // Assert
       expect(response.headers['Location']).to.equal(expected);
     });
-  })
+  });
 });

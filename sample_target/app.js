@@ -12,7 +12,8 @@ var url = require('url');
 var app = express();
 
 var json = fs.readFileSync(__dirname + '/../config.json', 'utf8');
-fakeminder_config = JSON.parse(json);
+var fakeminder_config = JSON.parse(json);
+routes.init(fakeminder_config);
 var target_url = url.parse(fakeminder_config.target_site.url);
 
 // all environments
@@ -27,7 +28,7 @@ app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
-if ('development' == app.get('env')) {
+if ('development' === app.get('env')) {
   app.use(express.errorHandler());
 }
 

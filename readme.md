@@ -72,25 +72,19 @@ Follow the instructions onscreen and FakeMinder will save the results to a new c
 
 ## Running Tests
 
-Unit tests are written using Mocha and can be run using the standard command:
+Both analysis using JSHint and the execution of unit tests are executed using the default grunt task:
 
-`mocha`
+`grunt`
 
-Integration tests are executed using PhantomJS and CasperJS.
+Integration tests are executed using PhantomJS and CasperJS. Execute the corresponding grunt task to run them:
 
-1. Start FakeMinder using: `node main.js`
-2. Start the sample app using: `npm run-script run-sample`
-3. Execute the tests using: `casperjs test ./sample_target/test/*.js`
+`grunt int-test`
 
 ## Code Coverage
 
-Install Instanbul into your global packages using:
+Code coverage for tests are generated using the following grunt task:
 
-`npm install instanbul -g`
-
-Then execute the npm script *coverage* using the following command:
-
-`npm run-script coverage`
+`grunt cover`
 
 The results of the coverage test run will now be displayed in your default browser.
 

@@ -39,5 +39,5 @@ describe('Cli', function() {
         done();
       });
     });
-  })
+  });
 });
