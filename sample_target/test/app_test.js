@@ -69,7 +69,7 @@ casper.test.begin('Verify protected page', 3, function suite(test) {
 /*
  * Login page
  */
-casper.test.begin('Verify login page', 3, function suite(test) {
+casper.test.begin('Verify login page', 4, function suite(test) {
   casper.start(homepage_url);
 
   casper.then(function() {
@@ -80,6 +80,7 @@ casper.test.begin('Verify login page', 3, function suite(test) {
     test.assertHttpStatus(200);
     test.assertTitle('Login');
     test.assertTextExists('Please enter your username and password then click Login.');
+    test.assertExists('input#TARGET[value="' + fakeminder_config.target_site.pathnames.protected + '"]')
   });
 
   casper.run(function() {

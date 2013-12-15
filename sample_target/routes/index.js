@@ -46,7 +46,7 @@ exports.protected = function(req, res) {
 exports.logon = function(req, res) {
   res.render('logon', {
     title: 'Login',
-    target: url.resolve(fakeminder_config.target_site.url, fakeminder_config.target_site.pathnames.protected),
+    target: fakeminder_config.target_site.pathnames.protected,
     sm_login: fakeminder_config.proxy.pathnames.logon
   });
 };

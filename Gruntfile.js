@@ -106,14 +106,24 @@ module.exports = function(grunt) {
   // Default task.
   grunt.registerTask('default', ['clear', 'jshint', 'simplemocha']);
   grunt.registerTask('test', ['clear', 'simplemocha']);
-  grunt.registerTask('int-test', ['clear', 'fakeminder-start', 'express:sample_target', 'casperjs', 'express:sample_target:stop', 'fakeminder-stop']);
+  grunt.registerTask('int-test', 'Execute integration tests against the sample app through the proxy', function() {
+    // Make sure failed automation tests don't break the entire task
+    // so we can shutdown both the FakeMinder and Express apps.
+    grunt.option('force', true);
+    grunt.task.run('clear');
+    grunt.task.run('fakeminder-start');
+    grunt.task.run('express:sample_target');
+    grunt.task.run('casperjs');
+    grunt.task.run('express:sample_target:stop');
+    grunt.task.run('fakeminder-stop');
+  });
   grunt.registerTask('cover', ['clear', 'clean', 'istanbul', 'open:cover']);
   grunt.registerTask('cover-check', ['clear', 'clean', 'istanbul', 'coverage']);
 
   var server;
 
   // Run the FakeMinder server
-  grunt.registerTask('fakeminder-start', function() {
+  grunt.registerTask('fakeminder-start', 'Start an instance of FakeMinder using the default config.', function() {
     var done = this.async();
 
     server = grunt.util.spawn({
@@ -134,7 +144,7 @@ module.exports = function(grunt) {
   });
 
   // End the FakeMinder server
-  grunt.registerTask('fakeminder-stop', function() {
+  grunt.registerTask('fakeminder-stop', 'Stop the running instance of FakeMinder.', function() {
     if (server && server.kill) {
       server.kill('SIGTERM');
       server = null;
