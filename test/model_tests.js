@@ -1,4 +1,5 @@
 var expect = require('expect.js'),
+    _ = require('underscore'),
     Model = require('../lib/model.js');
 
 describe('User', function() {
@@ -73,6 +74,93 @@ describe('User', function() {
 
       // Assert
       expect(subject.locked).to.eql(expected);
+    });
+
+    it('accepts a locked value', function() {
+      // Arrange
+      var subject;
+      var expected = true;
+
+      // Act
+      subject = new Model.User({locked: expected});
+
+      // Assert
+      expect(subject.locked).to.eql(expected);
+    });
+
+    it('accepts a login_attempts value', function() {
+      // Arrange
+      var subject;
+      var expected = 3;
+
+      // Act
+      subject = new Model.User({login_attempts: expected});
+
+      // Assert
+      expect(subject.login_attempts).to.eql(expected);
+    });
+  });
+
+  describe('#failedLogon', function() {
+    it('increments the number of logon attempts', function() {
+      // Arrange
+      var subject = new Model.User();
+
+      // Act
+      subject.failedLogon();
+
+      // Assert
+      expect(subject.login_attempts).to.equal(1);
+    });
+
+    it('sets the locked flag if the specified attempts have been reached', function() {
+      // Arrange
+      var subject = new Model.User();
+      subject.login_attempts = 2;
+
+      // Act
+      subject.failedLogon(3);
+
+      // Assert
+      expect(subject.locked).to.equal(true);
+    });
+
+    it('leaves the locked flag false if the specified attempts have not been reached', function() {
+      // Arrange
+      var subject = new Model.User();
+      subject.login_attempts = 1;
+
+      // Act
+      subject.failedLogon(3);
+
+      // Assert
+      expect(subject.locked).to.equal(false);
+    });
+  });
+
+  describe('#save', function() {
+    it('writes the current user to the given object', function() {
+      // Arrange
+      var subject = new Model.User({name: 'bob'});
+      var data_store = [];
+
+      // Act
+      subject.save(data_store);
+
+      // Assert
+      expect(data_store[0]).to.eql(subject);
+    });
+
+    it('updates the existing user to the given object', function() {
+      // Arrange
+      var subject = new Model.User({name: 'bob'});
+      var data_store = [{name: 'sally'}, {name: 'bob'}];
+
+      // Act
+      subject.save(data_store);
+
+      // Assert
+      expect(data_store[1]).to.eql(subject);
     });
   });
 });

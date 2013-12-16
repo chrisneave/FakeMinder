@@ -356,6 +356,20 @@ describe('FakeMinder', function() {
         request.headers['cookie'] = 'FORMCRED=' + formcred.formcred_id;
       });
 
+      describe('and the user associated with the FORMCRED is currently locked', function() {
+        it('responds with a redirect to the account locked URI', function() {
+          // Arrange
+          subject.config.users[0].locked = true;
+
+          // Act
+          subject.protected(request, response);
+
+          // Assert
+          expect(response.statusCode).to.be(302);
+          expect(response.headers['Location']).to.be(getTargetSiteUrl('account_locked'));
+        });
+      });
+
       it('destroys any existing session for the user', function(done) {
         // Arrange
         var session = new Model.Session({
@@ -443,6 +457,15 @@ describe('FakeMinder', function() {
           done();
         });
       });
+
+      it('resets the login_attempts for the user back to zero', function(done) {
+        subject.config.users[0].login_attempts = 2;
+
+        subject.protected(request, response, function() {
+          expect(subject.config.users[0].login_attempts).to.equal(0);
+          done();
+        });
+      });
     });
 
     describe('and the FORMCRED cookie maps to a bad login', function() {
@@ -494,7 +517,6 @@ describe('FakeMinder', function() {
         });
         subject.formcred[formcred.formcred_id] = formcred;
         request.headers['cookie'] = 'FORMCRED=' + formcred.formcred_id;
-        subject.config.users = [user];
       });
 
       it('responds with a redirect to the bad password URI', function() {
@@ -521,20 +543,20 @@ describe('FakeMinder', function() {
       describe('and the user has exceeded the maximum number of login attempts', function() {
         it('locks the user\'s account', function() {
           // Arrange
-          user.login_attempts = 3;
+          subject.config.users[0].login_attempts = 2;
 
           // Act
           subject.protected(request, response);
 
           // Assert
-          expect(user.locked).to.be.ok();
+          expect(subject.config.users[0].locked).to.be.ok();
         });
       });
 
       describe('and the user\'s account is locked', function() {
         it('responds with a redirect to the account locked URI', function() {
           // Arrange
-          user.locked = true;
+          subject.config.users[0].locked = true;
 
           // Act
           subject.protected(request, response);

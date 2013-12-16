@@ -172,6 +172,17 @@ casper.test.begin('Login with an invalid password', 2, function suite(test) {
 casper.test.begin('View the account lockout page after three login attempts', 7, function suite(test) {
   casper.start(proxy_url + logon_url);
 
+  // Logon successfully first to ensure the number of logon attempts is reset to zero.
+  casper.then(function() {
+    this.fill('form#logonform', {
+      'USERNAME': 'bob',
+      'PASSWORD': 'test1234',
+      'TARGET': protected_url
+    }, true);
+  });
+
+  casper.thenOpen(proxy_url + logon_url);
+
   casper.then(function() {
     this.fill('form#logonform', {
       'USERNAME': 'bob',
