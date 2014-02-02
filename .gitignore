@@ -8,3 +8,5 @@ docs
 
 # WebStorm project folder
 .idea
+
+npm-debug.log

@@ -24,8 +24,7 @@
       "bad_login": "/system/error/badlogin",
       "bad_password": "/system/error/badpassword",
       "account_locked": "/system/error/accountlocked",
-      "protected": "/protected",
-      "public": "/"
+      "protected": "/protected"
     }
   },
 	"users": [
