@@ -54,7 +54,9 @@ if ('development' === app.get('env')) {
 app.get('/', routes.index);
 var protected_urls = fakeminder_config.target_site.pathnames.protected;
 for (var i = 0; i < protected_urls.length; i++) {
-  app.get(protected_urls[i], routes.protected);
+  if (protected_urls[i].protected) {
+    app.get(protected_urls[i].url, routes.protected);
+  }
 }
 app.get('/public/logon', routes.logon);
 app.get(fakeminder_config.target_site.pathnames.logoff, routes.logoff);

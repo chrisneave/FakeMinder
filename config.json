@@ -25,8 +25,10 @@
       "bad_password": "/system/error/badpassword",
       "account_locked": "/system/error/accountlocked",
       "protected": [
-        "/protected",
-        "/really_private"
+        { "url": "/protected", "protected": true },
+        { "url": "/really_private", "protected": true },
+        { "url": "/public", "protected": false },
+        { "url": "/wide_open", "protected": false }
       ]
     }
   },

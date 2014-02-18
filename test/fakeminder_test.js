@@ -329,6 +329,17 @@ describe('FakeMinder', function() {
         // Assert
         expect(request.headers['header1']).to.equal('auth1');
       });
+
+      it('handles a request not matching the first configured public URL', function() {
+        // Arrange
+        request.url = '/wide_open/verypublic';
+
+        // Act
+        subject.protected(request, response, function() {});
+
+        // Assert
+        expect(request.headers).to.be.empty();
+      });
     });
 
     describe('and there is an expired session', function() {
