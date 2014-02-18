@@ -276,7 +276,7 @@ describe('FakeMinder', function() {
       it('redirects the user to the not_authenticated URL', function() {
         // Arrange
         // Act
-        subject.protected(request, response);
+        subject.protected(request, response, function() {});
 
         // Assert
         expect(response.statusCode).to.be(302);
@@ -318,6 +318,17 @@ describe('FakeMinder', function() {
           done();
         });
       });
+
+      it('handles a request not matching the first configured protected URL', function() {
+        // Arrange
+        request.url = '/really_private/secure/info';
+
+        // Act
+        subject.protected(request, response, function() {});
+
+        // Assert
+        expect(request.headers['header1']).to.equal('auth1');
+      });
     });
 
     describe('and there is an expired session', function() {
@@ -335,7 +346,7 @@ describe('FakeMinder', function() {
         subject.sessions[session.session_id] = session;
 
         // Act
-        subject.protected(request, response);
+        subject.protected(request, response, function() {});
 
         // Assert
         expect(response.statusCode).to.be(302);
@@ -362,7 +373,7 @@ describe('FakeMinder', function() {
           subject.config.users[0].locked = true;
 
           // Act
-          subject.protected(request, response);
+          subject.protected(request, response, function() {});
 
           // Assert
           expect(response.statusCode).to.be(302);
@@ -487,7 +498,7 @@ describe('FakeMinder', function() {
       it('responds with a redirect to the bad login URI', function() {
         // Arrange
         // Act
-        subject.protected(request, response);
+        subject.protected(request, response, function() {});
 
         // Assert
         expect(response.statusCode).to.be(302);
@@ -497,7 +508,7 @@ describe('FakeMinder', function() {
       it('destroys the formcred session', function() {
         // Arrange
         // Act
-        subject.protected(request, response);
+        subject.protected(request, response, function() {});
 
         // Assert
         expect(subject.formcred).to.not.have.key(formcred.formcred_id);
@@ -523,7 +534,7 @@ describe('FakeMinder', function() {
         // Arrange
 
         // Act
-        subject.protected(request, response);
+        subject.protected(request, response, function() {});
 
         // Assert
         expect(response.statusCode).to.be(302);
@@ -534,7 +545,7 @@ describe('FakeMinder', function() {
         // Arrange
 
         // Act
-        subject.protected(request, response);
+        subject.protected(request, response, function() {});
 
         // Assert
         expect(subject.config.users[0].login_attempts).to.equal(1);
@@ -546,7 +557,7 @@ describe('FakeMinder', function() {
           subject.config.users[0].login_attempts = 2;
 
           // Act
-          subject.protected(request, response);
+          subject.protected(request, response, function() {});
 
           // Assert
           expect(subject.config.users[0].locked).to.be.ok();
@@ -559,7 +570,7 @@ describe('FakeMinder', function() {
           subject.config.users[0].locked = true;
 
           // Act
-          subject.protected(request, response);
+          subject.protected(request, response, function() {});
 
           // Assert
           expect(response.statusCode).to.be(302);
@@ -570,7 +581,7 @@ describe('FakeMinder', function() {
       it('destroys the formcred session', function() {
         // Arrange
         // Act
-        subject.protected(request, response);
+        subject.protected(request, response, function() {});
 
         // Assert
         expect(subject.formcred).to.not.have.key(formcred.formcred_id);
@@ -596,7 +607,7 @@ describe('FakeMinder', function() {
         });
 
         // Act
-        subject.protected(request, response);
+        subject.protected(request, response, function() {});
 
         // Assert
         expect(subject.formcred).to.not.have.key(formcred.formcred_id);
@@ -651,7 +662,7 @@ describe('FakeMinder', function() {
         subject.end(request, response, function() {
           // Assert
           expect(request.headers['x-proxied-by']).to.equal('somehost:3245');
-          done();       
+          done();
         });
       });
 
@@ -664,7 +675,7 @@ describe('FakeMinder', function() {
         subject.end(request, response, function() {
           // Assert
           expect(response.headers['x-proxied-by']).to.equal('somehost:3245');
-          done();       
+          done();
         });
       });
     });
@@ -678,7 +689,7 @@ describe('FakeMinder', function() {
         subject.end(request, response, function() {
           // Assert
           expect(response.headers).to.not.have.key('x-proxied-by');
-          done();       
+          done();
         });
       });
 
@@ -690,11 +701,11 @@ describe('FakeMinder', function() {
         subject.end(request, response, function() {
           // Assert
           expect(response.headers).to.not.have.key('x-proxied-by');
-          done();       
+          done();
         });
       });
     });
-    
+
     it('resets the expiration of the session', function(done) {
       // Arrange
       var now = new Date();

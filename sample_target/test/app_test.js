@@ -5,7 +5,7 @@ var fs = require('fs'),
     target_url = fakeminder_config.target_site.url,
     homepage_url = proxy_url + '/',
     logon_url = '/public/logon',
-    protected_url = proxy_url + fakeminder_config.target_site.pathnames.protected,
+    protected_url = proxy_url + fakeminder_config.target_site.pathnames.protected[0],
     logoff_url = proxy_url + fakeminder_config.target_site.pathnames.logoff;
 
 /*
@@ -15,7 +15,7 @@ casper.test.begin('Verify homepage', 4, function suite(test) {
   casper.start(homepage_url, function() {
     test.assertHttpStatus(200);
     test.assertExists('a[href="' + fakeminder_config.target_site.pathnames.logoff + '"]', 'Has a link to the logoff page');
-    test.assertExists('a[href="' + fakeminder_config.target_site.pathnames.protected + '"]', 'Has a link to the protected folder');
+    test.assertExists('a[href="' + fakeminder_config.target_site.pathnames.protected[0] + '"]', 'Has a link to the protected folder');
     test.assertExists('a[href="/public/logon"]', 'Has a link to the login page');
   });
 
@@ -52,7 +52,7 @@ casper.test.begin('Verify protected page', 3, function suite(test) {
   casper.start(homepage_url);
 
   casper.then(function() {
-    this.click('a[href="' + fakeminder_config.target_site.pathnames.protected + '"]');
+    this.click('a[href="' + fakeminder_config.target_site.pathnames.protected[0] + '"]');
   });
 
   casper.then(function() {
@@ -80,7 +80,7 @@ casper.test.begin('Verify login page', 4, function suite(test) {
     test.assertHttpStatus(200);
     test.assertTitle('Login');
     test.assertTextExists('Please enter your username and password then click Login.');
-    test.assertExists('input#TARGET[value="' + fakeminder_config.target_site.pathnames.protected + '"]')
+    test.assertExists('input#TARGET[value="' + fakeminder_config.target_site.pathnames.protected[0] + '"]')
   });
 
   casper.run(function() {
