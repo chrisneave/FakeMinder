@@ -14,21 +14,24 @@
 		"target_field": "TARGET",
     "session_expiry_minutes": 20,
     "max_login_attempts": 3,
-    "smagentname": ""
-	},
-  "target_site": {
-    "url": "http://localhost:4567",
-    "pathnames": {
+    "smagentname": "",
+    "redirects": {
       "logoff": "/system/logout",
       "not_authenticated": "/system/error/notauthenticated",
       "bad_login": "/system/error/badlogin",
       "bad_password": "/system/error/badpassword",
-      "account_locked": "/system/error/accountlocked",
-      "protected": [
+      "account_locked": "/system/error/accountlocked"
+    }
+	},
+  "target_site": {
+    "url": "http://localhost:4567",
+    "url_protection": {
+      "protected_by_default": true,
+      "paths": [
         { "url": "/protected", "protected": true },
         { "url": "/really_private", "protected": true },
-        { "url": "/public", "protected": false },
-        { "url": "/wide_open", "protected": false }
+        { "url": "/system/logout", "protected": false },
+        { "url": "{0}/error", "protected": false }
       ]
     }
   },
