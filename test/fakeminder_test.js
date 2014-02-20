@@ -897,5 +897,40 @@ describe('FakeMinder', function() {
         expect(result).to.eql(url_config.paths[0]);
       });
     });
+
+    describe('path component filters', function() {
+      it('skips a path component when matching a URL', function() {
+        // Arrange
+        url_config.paths = [{ url: '{1}/123/xyz', protected: false }];
+
+        // Act
+        var result = subject._isProtected(url_config, '/abc/123/xyz');
+
+        // Assert
+        expect(result).to.eql(url_config.paths[0]);
+      });
+
+      it('skips multiple path components if specified in the filter', function() {
+        // Arrange
+        url_config.paths = [{ url: '{5}/123/xyz', protected: false }];
+
+        // Act
+        var result = subject._isProtected(url_config, '/abc/1/2/dd/43d%20/123/xyz');
+
+        // Assert
+        expect(result).to.eql(url_config.paths[0]);
+      });;
+
+      it('can use path component filters and wildcards together', function() {
+        // Arrange
+        url_config.paths = [{ url: '{2}*/123/*', protected: false }];
+
+        // Act
+        var result = subject._isProtected(url_config, '/abc/1/2/dd/43d%20/123/xyz');
+
+        // Assert
+        expect(result).to.eql(url_config.paths[0]);
+      });
+    });
   });
 });

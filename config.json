@@ -26,12 +26,9 @@
   "target_site": {
     "url": "http://localhost:4567",
     "url_protection": {
-      "protected_by_default": true,
+      "protected_by_default": false,
       "paths": [
-        { "url": "/protected", "protected": true },
-        { "url": "/really_private", "protected": true },
-        { "url": "/system/logout", "protected": false },
-        { "url": "{0}/error", "protected": false }
+        { "url": "/protected", "protected": true }
       ]
     }
   },
