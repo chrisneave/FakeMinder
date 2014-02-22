@@ -52,7 +52,7 @@ describe('FakeMinder', function() {
   };
 
   var getTargetSiteUrl = function(url_type) {
-    return subject.config.siteminder.redirects[url_type];
+    return subject.config.upstreamApp('sample_target')[url_type];
   };
 
   it('parses the config.json file and writes it to the config property', function() {
@@ -65,7 +65,7 @@ describe('FakeMinder', function() {
     subject = new FakeMinder('config.json');
 
     // Assert
-    expect(subject.config).to.eql(json);
+    expect(subject.config._config).to.eql(json);
   });
 
   describe('init()', function() {
@@ -120,7 +120,7 @@ describe('FakeMinder', function() {
         user;
 
     beforeEach(function() {
-      request.url = subject.config.siteminder.redirects.logon;
+      request.url = subject.config.siteminder().login_fcc;
       request.method = 'POST';
       user = 'bob';
       post_data = 'USERNAME=' + user + '&PASSWORD=test1234&TARGET=' + target;
@@ -200,7 +200,7 @@ describe('FakeMinder', function() {
 
       it('creates a new FORMCRED that maps to the user', function(done) {
         // Arrange
-        var expected = _.findWhere(subject.config.users, {'name': user});
+        var expected = _.findWhere(subject.config.users(), {'name': user});
 
         // Act
         subject.logon(request, response, undefined, function() {
@@ -214,7 +214,7 @@ describe('FakeMinder', function() {
 
       it('resets the login_attempts for the user back to zero', function(done) {
         // Arrange
-        var expected = _.findWhere(subject.config.users, {'name': user});
+        var expected = _.findWhere(subject.config.users(), {'name': user});
         expected.login_attempts = 2;
 
         // Act
@@ -358,7 +358,7 @@ describe('FakeMinder', function() {
       describe('and the user associated with the FORMCRED is currently locked', function() {
         it('responds with a redirect to the account locked URI', function() {
           // Arrange
-          subject.config.users[0].locked = true;
+          subject.config.users()[0].locked = true;
 
           // Act
           subject.protected(request, response, function() {});
@@ -413,7 +413,7 @@ describe('FakeMinder', function() {
         // Arrange
         subject.sessions = {};
         var now = new Date();
-        var session_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
+        var session_expiry = new Date(now.getTime() + subject.config.siteminder().session_expiry_minutes * 60000);
 
         // Act
         subject.protected(request, response, function() {
@@ -432,7 +432,7 @@ describe('FakeMinder', function() {
         // Arrange
         subject.sessions = {};
         var now = new Date();
-        var session_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
+        var session_expiry = new Date(now.getTime() + subject.config.siteminder().session_expiry_minutes * 60000);
 
         // Act
         subject.protected(request, response, function() {
@@ -458,10 +458,10 @@ describe('FakeMinder', function() {
       });
 
       it('resets the login_attempts for the user back to zero', function(done) {
-        subject.config.users[0].login_attempts = 2;
+        subject.config.users()[0].login_attempts = 2;
 
         subject.protected(request, response, function() {
-          expect(subject.config.users[0].login_attempts).to.equal(0);
+          expect(subject.config.users()[0].login_attempts).to.equal(0);
           done();
         });
       });
@@ -480,7 +480,7 @@ describe('FakeMinder', function() {
         });
         subject.formcred[formcred.formcred_id] = formcred;
         request.headers['cookie'] = 'FORMCRED=' + formcred.formcred_id;
-        subject.config.users = [user];
+        subject.config._config.users = [user];
       });
 
       it('responds with a redirect to the bad login URI', function() {
@@ -536,26 +536,26 @@ describe('FakeMinder', function() {
         subject.protected(request, response, function() {});
 
         // Assert
-        expect(subject.config.users[0].login_attempts).to.equal(1);
+        expect(subject.config.users()[0].login_attempts).to.equal(1);
       });
 
       describe('and the user has exceeded the maximum number of login attempts', function() {
         it('locks the user\'s account', function() {
           // Arrange
-          subject.config.users[0].login_attempts = 2;
+          subject.config.users()[0].login_attempts = 2;
 
           // Act
           subject.protected(request, response, function() {});
 
           // Assert
-          expect(subject.config.users[0].locked).to.be.ok();
+          expect(subject.config.users()[0].locked).to.be.ok();
         });
       });
 
       describe('and the user\'s account is locked', function() {
         it('responds with a redirect to the account locked URI', function() {
           // Arrange
-          subject.config.users[0].locked = true;
+          subject.config.users()[0].locked = true;
 
           // Act
           subject.protected(request, response, function() {});
@@ -640,60 +640,6 @@ describe('FakeMinder', function() {
   });
 
   describe('end()', function() {
-    describe('if set_x_proxied_by is set to true', function() {
-      it('adds an x-proxied-by header value to the request', function(done) {
-        // Arrange
-        subject.config.proxy.url = 'http://somehost:3245';
-        subject.config.proxy.set_x_proxied_by = true;
-
-        // Act
-        subject.end(request, response, function() {
-          // Assert
-          expect(request.headers['x-proxied-by']).to.equal('somehost:3245');
-          done();
-        });
-      });
-
-      it('adds an x-proxied-by header to the response', function(done) {
-        // Arrange
-        subject.config.proxy.url = 'http://somehost:3245';
-        subject.config.proxy.set_x_proxied_by = true;
-
-        // Act
-        subject.end(request, response, function() {
-          // Assert
-          expect(response.headers['x-proxied-by']).to.equal('somehost:3245');
-          done();
-        });
-      });
-    });
-
-    describe('if set_x_proxied_by is set to false', function() {
-      it('does not add an x-proxied-by header value to the request', function(done) {
-        // Arrange
-        subject.config.proxy.set_x_proxied_by = false;
-
-        // Act
-        subject.end(request, response, function() {
-          // Assert
-          expect(response.headers).to.not.have.key('x-proxied-by');
-          done();
-        });
-      });
-
-      it('does not add an x-proxied-by header to the response', function(done) {
-        // Arrange
-        subject.config.proxy.set_x_proxied_by = false;
-
-        // Act
-        subject.end(request, response, function() {
-          // Assert
-          expect(response.headers).to.not.have.key('x-proxied-by');
-          done();
-        });
-      });
-    });
-
     it('resets the expiration of the session', function(done) {
       // Arrange
       var now = new Date();
@@ -705,7 +651,7 @@ describe('FakeMinder', function() {
       // Act
       subject.end(request, response, function() {
         var session_expired_date = new Date(subject.sessions[session.session_id].expiration);
-        expected_expiry = new Date(now.getTime() + subject.config.siteminder.session_expiry_minutes * 60000);
+        expected_expiry = new Date(now.getTime() + subject.config.siteminder().session_expiry_minutes * 60000);
 
         // Assert
         expect(session_expired_date.getFullYear()).to.equal(expected_expiry.getFullYear());
@@ -733,20 +679,6 @@ describe('FakeMinder', function() {
         expect(cookies[0]).to.contain('SMSESSION=' + session.session_id);
         done();
       });
-    });
-  });
-
-  describe('rewriteResponse()', function() {
-    it('rewrites the Location header to match that of the proxy server', function() {
-      // Arrange
-      response.headers['Location'] = subject.config.target_site.url;
-      var expected = subject.config.proxy.url;
-
-      // Act
-      subject.rewriteResponse(response);
-
-      // Assert
-      expect(response.headers['Location']).to.equal(expected);
     });
   });
 });

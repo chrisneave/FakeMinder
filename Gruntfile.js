@@ -30,7 +30,8 @@ module.exports = function(grunt) {
           describe: true,
           expect: true,
           it: true,
-          beforeEach: true
+          beforeEach: true,
+          afterEach: true
         }
       }
     },
@@ -131,7 +132,7 @@ module.exports = function(grunt) {
       args: ['start', 'config.json']
     }, done);
 
-    server.stdout.on('data', function(data) {      
+    server.stdout.on('data', function(data) {
       var message = '' + data;
       var regex = new RegExp('FakeMinder listening on port ');
       if (message.match(regex)) {

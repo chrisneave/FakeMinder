@@ -1,7 +1,5 @@
 {
 	"proxy": {
-    "protocol": "http",
-    "host": "localhost",
     "port": 8000,
     "upstreamApps": [
       "sample_target"
@@ -20,8 +18,8 @@
 	},
   "upstreamApps": {
     "sample_target": {
-      "protocol": "http",
-      "host": "localhost",
+      "url": "http://localhost:8000",
+      "hostname": "localhost",
       "port": 4567,
       "logoff": "/system/logout",
       "not_authenticated": "/system/error/notauthenticated",
