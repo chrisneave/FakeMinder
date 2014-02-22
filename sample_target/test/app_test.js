@@ -1,22 +1,17 @@
-var fs = require('fs'),
-    json = fs.read('./config.json', 'utf8'),
-    fakeminder_config = JSON.parse(json),
-    proxy_url = fakeminder_config.proxy.url,
-    target_url = fakeminder_config.target_site.url,
-    homepage_url = proxy_url + '/',
-    logon_url = '/public/logon',
-    protected_url = proxy_url + fakeminder_config.target_site.pathnames.protected[0].url,
-    logoff_url = proxy_url + fakeminder_config.target_site.pathnames.logoff;
+var upstreamApp = { url: 'http://localhost:8000', logoff: '/system/logout' };
+var logon_url = '/public/logon';
+var protected_url = '/protected';
+var logoff_url = upstreamApp.logoff;
 
 /*
  * Homepage
  */
 casper.test.begin('Verify homepage', 4, function suite(test) {
-  casper.start(homepage_url, function() {
+  casper.start(upstreamApp.url, function() {
     test.assertHttpStatus(200);
-    test.assertExists('a[href="' + fakeminder_config.target_site.pathnames.logoff + '"]', 'Has a link to the logoff page');
-    test.assertExists('a[href="' + fakeminder_config.target_site.pathnames.protected[0].url + '"]', 'Has a link to the protected folder');
-    test.assertExists('a[href="/public/logon"]', 'Has a link to the login page');
+    test.assertExists('a[href="' + upstreamApp.logoff + '"]', 'Has a link to the logoff page');
+    test.assertExists('a[href="' + protected_url + '"]', 'Has a link to the protected folder');
+    test.assertExists('a[href="' + logon_url + '"]', 'Has a link to the login page');
   });
 
   casper.run(function() {
@@ -28,10 +23,10 @@ casper.test.begin('Verify homepage', 4, function suite(test) {
  * Logoff page
  */
 casper.test.begin('Verify logoff page', 3, function suite(test) {
-  casper.start(homepage_url);
+  casper.start(upstreamApp.url);
 
   casper.then(function() {
-    this.click('a[href="' + fakeminder_config.target_site.pathnames.logoff + '"]');
+    this.click('a[href="' + upstreamApp.logoff + '"]');
   });
 
   casper.then(function() {
@@ -49,10 +44,10 @@ casper.test.begin('Verify logoff page', 3, function suite(test) {
  * Protected page
  */
 casper.test.begin('Verify protected page', 3, function suite(test) {
-  casper.start(homepage_url);
+  casper.start(upstreamApp.url);
 
   casper.then(function() {
-    this.click('a[href="' + fakeminder_config.target_site.pathnames.protected[0].url + '"]');
+    this.click('a[href="' + protected_url + '"]');
   });
 
   casper.then(function() {
@@ -70,7 +65,7 @@ casper.test.begin('Verify protected page', 3, function suite(test) {
  * Login page
  */
 casper.test.begin('Verify login page', 4, function suite(test) {
-  casper.start(homepage_url);
+  casper.start(upstreamApp.url);
 
   casper.then(function() {
     this.click('a[href="' + logon_url + '"]');
@@ -80,7 +75,7 @@ casper.test.begin('Verify login page', 4, function suite(test) {
     test.assertHttpStatus(200);
     test.assertTitle('Login');
     test.assertTextExists('Please enter your username and password then click Login.');
-    test.assertExists('input#TARGET[value="' + fakeminder_config.target_site.pathnames.protected[0].url + '"]')
+    test.assertExists('input#TARGET[value="' + protected_url + '"]')
   });
 
   casper.run(function() {
@@ -92,7 +87,7 @@ casper.test.begin('Verify login page', 4, function suite(test) {
  * Login with valid credentials
  */
 casper.test.begin('Login with valid credentials', 6, function suite(test) {
-  casper.start(proxy_url + logon_url);
+  casper.start(upstreamApp.url + logon_url);
 
   casper.then(function() {
     this.fill('form#logonform', {
@@ -122,7 +117,7 @@ casper.test.begin('Login with valid credentials', 6, function suite(test) {
  * Login with an invalid user ID
  */
 casper.test.begin('Login with an invalid user ID', 2, function suite(test) {
-  casper.start(proxy_url + logon_url);
+  casper.start(upstreamApp.url + logon_url);
 
   casper.then(function() {
     this.fill('form#logonform', {
@@ -146,7 +141,7 @@ casper.test.begin('Login with an invalid user ID', 2, function suite(test) {
  * Login with an invalid password
  */
 casper.test.begin('Login with an invalid password', 2, function suite(test) {
-  casper.start(proxy_url + logon_url);
+  casper.start(upstreamApp.url + logon_url);
 
   casper.then(function() {
     this.fill('form#logonform', {
@@ -170,7 +165,7 @@ casper.test.begin('Login with an invalid password', 2, function suite(test) {
  * Lockout account
  */
 casper.test.begin('View the account lockout page after three login attempts', 7, function suite(test) {
-  casper.start(proxy_url + logon_url);
+  casper.start(upstreamApp.url + logon_url);
 
   // Logon successfully first to ensure the number of logon attempts is reset to zero.
   casper.then(function() {
@@ -181,7 +176,7 @@ casper.test.begin('View the account lockout page after three login attempts', 7,
     }, true);
   });
 
-  casper.thenOpen(proxy_url + logon_url);
+  casper.thenOpen(upstreamApp.url + logon_url);
 
   casper.then(function() {
     this.fill('form#logonform', {
@@ -196,7 +191,7 @@ casper.test.begin('View the account lockout page after three login attempts', 7,
     test.assertTitle('Bad Password');
   });
 
-  casper.thenOpen(proxy_url + logon_url);
+  casper.thenOpen(upstreamApp.url + logon_url);
 
   casper.then(function() {
     this.fill('form#logonform', {
@@ -211,7 +206,7 @@ casper.test.begin('View the account lockout page after three login attempts', 7,
     test.assertTitle('Bad Password');
   });
 
-  casper.thenOpen(proxy_url + logon_url);
+  casper.thenOpen(upstreamApp.url + logon_url);
 
   casper.then(function() {
     this.fill('form#logonform', {

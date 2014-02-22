@@ -28,15 +28,16 @@ var http = require('http');
 var path = require('path');
 var fs = require('fs');
 var url = require('url');
+var Config = require(__dirname + '/../lib/config');
 var app = express();
 
-var json = fs.readFileSync(__dirname + '/../config.json', 'utf8');
-var fakeminder_config = JSON.parse(json);
+var fakeminder_config = new Config();
+fakeminder_config.load(__dirname + '/../config.json', 'utf8');
 routes.init(fakeminder_config);
-var target_url = url.parse(fakeminder_config.target_site.url);
+var upstreamApp = fakeminder_config.upstreamApp('sample_target');
 
 // all environments
-app.set('port', target_url.port);
+app.set('port', upstreamApp.port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.favicon());
@@ -52,18 +53,13 @@ if ('development' === app.get('env')) {
 }
 
 app.get('/', routes.index);
-var protected_urls = fakeminder_config.target_site.pathnames.protected;
-for (var i = 0; i < protected_urls.length; i++) {
-  if (protected_urls[i].protected) {
-    app.get(protected_urls[i].url, routes.protected);
-  }
-}
+app.get('/protected', routes.protected);
 app.get('/public/logon', routes.logon);
-app.get(fakeminder_config.target_site.pathnames.logoff, routes.logoff);
-app.get(fakeminder_config.target_site.pathnames.not_authenticated, routes.not_authenticated);
-app.get(fakeminder_config.target_site.pathnames.bad_login, routes.bad_login);
-app.get(fakeminder_config.target_site.pathnames.bad_password, routes.bad_password);
-app.get(fakeminder_config.target_site.pathnames.account_locked, routes.account_locked);
+app.get('/system/logout', routes.logoff);
+app.get('/system/error/notauthenticated', routes.not_authenticated);
+app.get('/system/error/badlogin', routes.bad_login);
+app.get('/system/error/badpassword', routes.bad_password);
+app.get('/system/error/accountlocked', routes.account_locked);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

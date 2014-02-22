@@ -32,8 +32,8 @@ exports.init = function(config) {
 exports.index = function(req, res) {
   res.render('index', {
     title: 'Sample Target App',
-    logoff_url: fakeminder_config.target_site.pathnames.logoff,
-    protected_url: fakeminder_config.target_site.pathnames.protected[0].url
+    logoff_url: '/system/logout',
+    protected_url: '/protected'
   });
 };
 
@@ -46,8 +46,8 @@ exports.protected = function(req, res) {
 exports.logon = function(req, res) {
   res.render('logon', {
     title: 'Login',
-    target: fakeminder_config.target_site.pathnames.protected[0].url,
-    sm_login: fakeminder_config.proxy.pathnames.logon
+    target: '/protected',
+    sm_login: '/public/logon'
   });
 };
 
