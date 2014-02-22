@@ -1,10 +1,11 @@
 {
 	"proxy": {
-    "url": "http://localhost:8000",
-		"set_x_proxied_by": true,
-    "pathnames": {
-      "logon": "/public/siteminderagent/login.fcc"
-    }
+    "protocol": "http",
+    "host": "localhost",
+    "port": 8000,
+    "upstreamApps": [
+      "sample_target"
+    ]
 	},
 	"siteminder": {
 		"sm_cookie": "SMSESSION",
@@ -15,19 +16,19 @@
     "session_expiry_minutes": 20,
     "max_login_attempts": 3,
     "smagentname": "",
-    "redirects": {
+    "login_fcc": "/public/siteminderagent/login.fcc"
+	},
+  "upstreamApps": {
+    "sample_target": {
+      "protocol": "http",
+      "host": "localhost",
+      "port": 4567,
       "logoff": "/system/logout",
       "not_authenticated": "/system/error/notauthenticated",
       "bad_login": "/system/error/badlogin",
       "bad_password": "/system/error/badpassword",
-      "account_locked": "/system/error/accountlocked"
-    }
-	},
-  "target_site": {
-    "url": "http://localhost:4567",
-    "url_protection": {
-      "protected_by_default": false,
-      "paths": [
+      "account_locked": "/system/error/accountlocked",
+      "path_filters": [
         { "url": "/protected", "protected": true }
       ]
     }

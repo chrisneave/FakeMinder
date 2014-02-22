@@ -3,7 +3,7 @@ var expect = require('expect.js'),
     sinon = require('sinon'),
     Config = require('../lib/config');
 
-describe.only('Config', function() {
+describe('Config', function() {
   var subject,
       fs_stub,
       config_json;
@@ -42,7 +42,7 @@ describe.only('Config', function() {
       config_json = {
         proxy: {},
         siteminder: {},
-        target_site: {},
+        upstreamApps: {},
         users: []
       };
       fs_stub = sinon.stub(fs, 'readFileSync');
@@ -56,47 +56,85 @@ describe.only('Config', function() {
     });
   });
 
-  describe('#pathFilters', function() {
-    it('returns the set of path filters', function() {
+  describe('#proxy', function() {
+    it('returns the proxy configuration', function() {
       // Arrange
       var result;
       subject._config = {
-        target_site: {
-          url_protection: {
-            protected_by_default: true,
-            paths: [
-              { url: '/protected', protected: true }
-            ]
-          }
+        proxy: {
+          protocol: 'http',
+          host: 'localhost',
+          port: 8000,
+          upstreamApps: [
+            'sample_target'
+          ]
         }
       };
 
       // Act
-      result = subject.pathFilters();
+      result = subject.proxy();
 
       // Assert
-      expect(result).to.eql(subject._config.target_site.url_protection);
+      expect(result).to.eql(subject._config.proxy);
     });
   });
 
-  describe('#siteMinderRedirect', function() {
-    it('returns the redirect matching the given name', function() {
+  describe('#siteminder', function() {
+    it('returns the SiteMinder configuration', function() {
       // Arrange
       var result;
       subject._config = {
         siteminder: {
-          redirects: {
-            logoff: 'foo',
-            bad_login: 'bar'
-          }
+          sm_cookie: 'SMSESSION',
+          formcred_cookie: 'FORMCRED',
+          userid_field: 'USERNAME',
+          password_field: 'PASSWORD',
+          target_field: 'TARGET',
+          session_expiry_minutes: 20,
+          max_login_attempts: 3,
+          smagentname: 'ag-name1',
+          login_fcc: '/public/siteminderagent/login.fcc',
         }
       };
 
       // Act
-      result = subject.siteMinderRedirect('logoff');
+      result = subject.siteminder();
 
       // Assert
-      expect(result).to.eql('foo');
+      expect(result).to.eql(subject._config.siteminder);
+    });
+  });
+
+  describe('#upstreamApp', function() {
+    it('returns the configuration for the upstream application identified by the given name', function() {
+      // Arrange
+      var result;
+      subject._config = {
+        upstreamApps: {
+          'app2': {},
+          'sample_target': {
+            protocol: 'http',
+            host: 'localhost',
+            port: 4567,
+            logoff: '/system/logout',
+            not_authenticated: '/system/error/notauthenticated',
+            bad_login: '/system/error/badlogin',
+            bad_password: '/system/error/badpassword',
+            account_locked: '/system/error/accountlocked',
+            protected_by_default: false,
+            path_filters: [
+              { url: '/protected', protected: true }
+            ]
+          },
+          'app1': {}
+        }
+      };
+
+      // Act
+      result = subject.upstreamApp('sample_target');
+
+      // Assert
+      expect(result).to.eql(subject._config.upstreamApps.sample_target);
     });
   });
 });
