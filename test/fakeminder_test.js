@@ -636,6 +636,20 @@ describe('FakeMinder', function() {
           done();
         });
       });
+
+      it('removes the current session from the request object', function() {
+        // Arrange
+        request.url = '/system/logout';
+        var session = new Model.Session({'session_id': 'session2'});
+        subject.sessions = {'session1':{}, 'session2':session, 'session3':{}};
+        request.fm_session = session;
+
+        // Act
+        subject.logoff(request, response, function() {});
+
+        // Assert
+        expect(request.fm_session).not.to.be.ok();
+      });
     });
 
     describe('when the logoff URI is not requested', function() {
