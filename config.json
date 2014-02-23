@@ -26,6 +26,7 @@
       "bad_login": "/system/error/badlogin",
       "bad_password": "/system/error/badpassword",
       "account_locked": "/system/error/accountlocked",
+      "protected_by_default": false,
       "path_filters": [
         { "url": "/protected", "protected": true }
       ]
