@@ -32,7 +32,7 @@ describe('Config', function() {
       upstreamApps: {
         'app2': {},
         'sample_target': {
-          url: 'http://localhost:8000',
+          proxy_pass: 'http://localhost:8000',
           hostname: 'localhost',
           port: 4567,
           logoff: '/system/logout',
