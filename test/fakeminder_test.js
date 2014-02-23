@@ -4,16 +4,19 @@ var expect = require('expect.js'),
     cookie = require('cookie'),
     _ = require('underscore'),
     FakeMinder = require('../lib/fakeminder.js'),
-    Model = require('../lib/model.js');
+    Model = require('../lib/model.js'),
+    log = require(__dirname + '/../lib/logger'),
+    sinon = require('sinon');
 
 describe('FakeMinder', function() {
   var subject,
       emptySession,
       request,
-      response;
+      response,
+      log_stub = sinon.stub(log);
 
   beforeEach(function() {
-    subject = new FakeMinder('config.json');
+    subject = new FakeMinder('config.json', log_stub);
     emptySession = { 'user':'' };
     request = {};
     response = {};
@@ -162,7 +165,7 @@ describe('FakeMinder', function() {
           subject.logon(request, response, undefined, function() {
             // Assert
             expect(response.statusCode).to.be(400);
-            expect(response.body).to.equal('SMAGENTNAME of "custom_agent" not supplied in logon POST data.');
+            expect(response.body).to.equal('SMAGENTNAME of custom_agent not supplied in logon POST data.');
             done();
           });
         });
@@ -178,7 +181,7 @@ describe('FakeMinder', function() {
           subject.logon(request, response, undefined, function() {
             // Assert
             expect(response.statusCode).to.be(400);
-            expect(response.body).to.equal('SMAGENTNAME of "custom_agent" not supplied in logon POST data.');
+            expect(response.body).to.equal('SMAGENTNAME of custom_agent not supplied in logon POST data.');
             done();
           });
         });

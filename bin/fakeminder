@@ -4,29 +4,39 @@ var fs = require('fs'),
     program = require('commander'),
     inquirer = require('inquirer'),
     server = require(__dirname + '/../lib/server'),
-    cli = require(__dirname + '/../lib/cli');
+    cli = require(__dirname + '/../lib/cli'),
+    log = require(__dirname + '/../lib/logger');
 
 program
   .version('0.0.1')
-  .usage('command [options]');
+  .usage('command [options]')
+  .option('-c, --config <file>', 'The configuration file to use')
+  .option('-l, --log <level>', 'Set the logging level (silent|error|warn|info|verbose)');
 
 program
   .command('start')
   .description('Start the FakeMinder server using the specified configuration file.')
   .action(function(args) {
-    args = args || 'config.json';
-    console.log('\nStarting FakeMinder server using configuration file %s.', args);
-    server.start(args);
+    log.level = 'info';
+    if (program.log) {
+      log.level = program.log;
+    }
+
+    program.config = program.config || 'config.json';
+
+    log.info('fakeminder', 'Starting FakeMinder server using configuration file %s.', program.config);
+    server.start(program.config, program.log);
   });
 
 program
   .command('create')
   .description('Create a new config file for a specific application and environment.')
   .action(function(args) {
-    console.log('\nCreating new configuration file.');
+    log.info('fakeminder', 'Creating new configuration file');
+
     cli.create(inquirer, args, fs.writeFile, function(filename, err) {
       if (err) { throw err; }
-      console.log('\nFinished creating new configuration file %s.\n', filename);
+      log.info('fakeminder', 'Finished creating new configuration file %s.', filename);
       process.exit();
     });
   });

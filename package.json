@@ -25,7 +25,8 @@
     "ejs": "0.8.x",
     "underscore": "1.5.x",
     "commander": "~2.1.0",
-    "inquirer": "~0.3.5"
+    "inquirer": "~0.3.5",
+    "npmlog": "0.0.6"
   },
   "devDependencies": {
     "mocha": "1.x",
