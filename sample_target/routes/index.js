@@ -47,7 +47,7 @@ exports.logon = function(req, res) {
   res.render('logon', {
     title: 'Login',
     target: '/protected',
-    sm_login: '/public/logon'
+    sm_login: fakeminder_config.siteminder().login_fcc
   });
 };
 

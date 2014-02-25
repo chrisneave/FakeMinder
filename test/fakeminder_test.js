@@ -260,6 +260,16 @@ describe('FakeMinder', function() {
         });
       });
     });
+
+    describe('and the request URL does not match the SiteMinder Login URL', function() {
+      it('invokes the next callback', function(done) {
+        // Arrange
+        request.url = '/foo/bar';
+
+        // Act & assert
+        subject.logon(request, response, done, function() {});
+      });
+    });
   });
 
   describe('protected()', function() {
