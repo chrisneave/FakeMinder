@@ -122,7 +122,7 @@ module.exports = function(grunt) {
   grunt.registerTask('cover-check', ['clear', 'clean', 'istanbul', 'coverage']);
 
   var server;
-  var regex = new RegExp(/FakeMinder listening on port/);
+  var regex = new RegExp(/Listening on port/);
 
   // Run the FakeMinder server
   grunt.registerTask('fakeminder-start', 'Start an instance of FakeMinder using the default config.', function() {
