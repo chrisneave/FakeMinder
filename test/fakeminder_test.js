@@ -294,6 +294,30 @@ describe('FakeMinder', function() {
         expect(response.statusCode).to.be(302);
         expect(response.headers['Location']).to.be(getTargetSiteUrl('not_authenticated'));
       });
+
+      describe('and the not_authenticated URL is not defined', function() {
+        it('returns a 401 response', function() {
+          // Arrange
+          subject.config._config.upstreamApps['sample_target'].not_authenticated = '';
+
+          // Act
+          subject.protected(request, response, function() {});
+
+          // Assert
+          expect(response.statusCode).to.be(401);
+        });
+
+        it('returns a WWW-Authenticate header requesting basic authentication', function() {
+          // Arrange
+          subject.config._config.upstreamApps['sample_target'].not_authenticated = '';
+
+          // Act
+          subject.protected(request, response, function() {});
+
+          // Assert
+          expect(response.headers['WWW-Authenticate']).to.be('Basic realm="Couldn\'t find a redirect URL for not_authenticated"');
+        });
+      });
     });
 
     describe('and there is a current session', function() {
@@ -333,8 +357,7 @@ describe('FakeMinder', function() {
     });
 
     describe('and there is an expired session', function() {
-      it('redirects the user-agent to the not_authenticated URL', function() {
-        // Arrange
+      beforeEach(function() {
         request.url = '/protected';
         var now = new Date();
         var sessionExpiry = new Date(now.getTime() - 120 * 60000);
@@ -345,13 +368,40 @@ describe('FakeMinder', function() {
         });
         request.fm_session = session;
         subject.sessions[session.session_id] = session;
+      });
 
+      it('redirects the user-agent to the not_authenticated URL', function() {
+        // Arrange
         // Act
         subject.protected(request, response, function() {});
 
         // Assert
         expect(response.statusCode).to.be(302);
         expect(response.headers['Location']).to.be(getTargetSiteUrl('not_authenticated'));
+      });
+
+      describe('and the not_authenticated URL is not defined', function() {
+        it('returns a 401 response', function() {
+          // Arrange
+          subject.config._config.upstreamApps['sample_target'].not_authenticated = '';
+
+          // Act
+          subject.protected(request, response, function() {});
+
+          // Assert
+          expect(response.statusCode).to.be(401);
+        });
+
+        it('returns a WWW-Authenticate header requesting basic authentication', function() {
+          // Arrange
+          subject.config._config.upstreamApps['sample_target'].not_authenticated = '';
+
+          // Act
+          subject.protected(request, response, function() {});
+
+          // Assert
+          expect(response.headers['WWW-Authenticate']).to.be('Basic realm="Couldn\'t find a redirect URL for not_authenticated"');
+        });
       });
     });
 
