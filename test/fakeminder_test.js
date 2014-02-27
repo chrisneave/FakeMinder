@@ -430,6 +430,21 @@ describe('FakeMinder', function() {
           expect(response.statusCode).to.be(302);
           expect(response.headers['Location']).to.be(getTargetSiteUrl('account_locked'));
         });
+
+        describe('and the account_locked redirect URI is not defined', function() {
+          it('returns a 404 response', function() {
+            // Arrange
+            subject.config.users()[0].locked = true;
+            subject.config._config.upstreamApps['sample_target'].account_locked = '';
+
+            // Act
+            subject.protected(request, response, function() {});
+
+            // Assert
+            expect(response.statusCode).to.be(404);
+            expect(response.body).to.equal('Account locked. A redirect URL for account_locked is not defined.');
+          });
+        });
       });
 
       it('destroys any existing session for the user', function(done) {
@@ -626,6 +641,21 @@ describe('FakeMinder', function() {
           // Assert
           expect(response.statusCode).to.be(302);
           expect(response.headers['Location']).to.be(getTargetSiteUrl('account_locked'));
+        });
+
+        describe('and the account_locked redirect URI is not defined', function() {
+          it('returns a 404 response', function() {
+            // Arrange
+            subject.config.users()[0].locked = true;
+            subject.config._config.upstreamApps['sample_target'].account_locked = '';
+
+            // Act
+            subject.protected(request, response, function() {});
+
+            // Assert
+            expect(response.statusCode).to.be(404);
+            expect(response.body).to.equal('Account locked. A redirect URL for account_locked is not defined.');
+          });
         });
       });
 
