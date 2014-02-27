@@ -621,6 +621,20 @@ describe('FakeMinder', function() {
         expect(response.headers['Location']).to.be(getTargetSiteUrl('bad_password'));
       });
 
+      describe('and the bad_password redirect URI is not defined', function() {
+        it('returns a 404 response', function() {
+          // Arrange
+          subject.config._config.upstreamApps['sample_target'].bad_password = '';
+
+          // Act
+          subject.protected(request, response, function() {});
+
+          // Assert
+          expect(response.statusCode).to.be(404);
+          expect(response.body).to.equal('Bad login. A redirect URL for bad_password is not defined.');
+        });
+      });
+
       it('increments the number of login attempts associated with the user', function() {
         // Arrange
 
