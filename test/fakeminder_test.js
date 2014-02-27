@@ -769,9 +769,6 @@ describe('FakeMinder', function() {
         expect(request.fm_session).not.to.be.ok();
       });
     });
-
-    describe('when the logoff URI is not requested', function() {
-    });
   });
 
   describe('end()', function() {
