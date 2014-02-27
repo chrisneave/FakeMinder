@@ -631,7 +631,7 @@ describe('FakeMinder', function() {
 
           // Assert
           expect(response.statusCode).to.be(404);
-          expect(response.body).to.equal('Bad login. A redirect URL for bad_password is not defined.');
+          expect(response.body).to.equal('Bad password. A redirect URL for bad_password is not defined.');
         });
       });
 
