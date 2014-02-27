@@ -571,6 +571,20 @@ describe('FakeMinder', function() {
         expect(response.headers['Location']).to.be(getTargetSiteUrl('bad_login'));
       });
 
+      describe('and the bad_login redirect URI is not defined', function() {
+        it('returns a 404 response', function() {
+          // Arrange
+          subject.config._config.upstreamApps['sample_target'].bad_login = '';
+
+          // Act
+          subject.protected(request, response, function() {});
+
+          // Assert
+          expect(response.statusCode).to.be(404);
+          expect(response.body).to.equal('Bad login. A redirect URL for bad_login is not defined.');
+        });
+      });
+
       it('destroys the formcred session', function() {
         // Arrange
         // Act
