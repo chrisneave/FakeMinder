@@ -328,5 +328,17 @@ describe('FormCred', function() {
       // Assert
       expect(subject.status).to.equal(expected);
     });
+
+    it('has a target_url', function() {
+      // Arrange
+      var subject,
+          expected = 'http://foo.com/bar';
+
+      // Act
+      subject = new Model.FormCred({'target_url': expected});
+
+      // Assert
+      expect(subject.target_url).to.equal(expected);
+    });
   });
 });
