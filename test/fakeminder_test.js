@@ -119,7 +119,7 @@ describe('FakeMinder', function() {
 
   describe('logon()', function() {
     var post_data,
-        target = 'http://localhost:8000/protected/home',
+        target = 'http://localhost:8000/protected/home?foo=bar',
         user;
 
     beforeEach(function() {
@@ -215,6 +215,19 @@ describe('FakeMinder', function() {
         });
       });
 
+      it('adds the full request URL to the FORMCRED', function() {
+        // Arrange
+        var expected = target;
+
+        // Act
+        subject.logon(request, response, undefined, function() {});
+
+        // Assert
+        var cookies = cookie.parse(response.headers['set-cookie'][0]);
+        var formcred_id = cookies[subject.FORMCRED_COOKIE];
+        expect(subject.formcred[formcred_id].target_url).to.equal(expected);
+      });
+
       it('resets the login_attempts for the user back to zero', function(done) {
         // Arrange
         var expected = _.findWhere(subject.config.users(), {'name': user});
@@ -243,6 +256,19 @@ describe('FakeMinder', function() {
           done();
         });
       });
+
+      it('adds the full request URL to the FORMCRED', function() {
+        // Arrange
+        var expected = target;
+
+        // Act
+        subject.logon(request, response, undefined, function() {});
+
+        // Assert
+        var cookies = cookie.parse(response.headers['set-cookie'][0]);
+        var formcred_id = cookies[subject.FORMCRED_COOKIE];
+        expect(subject.formcred[formcred_id].target_url).to.equal(expected);
+      });
     });
 
     describe('and the PASSWORD is not valid', function() {
@@ -258,6 +284,19 @@ describe('FakeMinder', function() {
           expect(subject.formcred[formcred_id].status).to.equal(Model.FormCredStatus.bad_password);
           done();
         });
+      });
+
+      it('adds the full request URL to the FORMCRED', function() {
+        // Arrange
+        var expected = target;
+
+        // Act
+        subject.logon(request, response, undefined, function() {});
+
+        // Assert
+        var cookies = cookie.parse(response.headers['set-cookie'][0]);
+        var formcred_id = cookies[subject.FORMCRED_COOKIE];
+        expect(subject.formcred[formcred_id].target_url).to.equal(expected);
       });
     });
 
