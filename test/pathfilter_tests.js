@@ -216,14 +216,17 @@ describe('PathFilter', function() {
       expect(result).to.equal(expected);
     });
 
-    it('throws an error if the path filter is invalid', function() {
+    it('ignores path filters that are not valid', function() {
       // Arrange
-      var url = 'http://localhost:8000/bar?one=two';
-      var path_filter = '{-3}/fizz/buzz';
+      var url = 'http://localhost:8000/bar';
+      var path_filter = '/fizz/buzz';
+      var expected = 'http://localhost:8000/fizz/buzz';
 
       // Act
+      var result = subject.resolve(url, path_filter);
+
       // Assert
-      expect(function() { subject.resolve(url, path_filter); }).to.throwError();
+      expect(result).to.equal(expected);
     });
   });
 });
