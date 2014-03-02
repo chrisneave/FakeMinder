@@ -1,15 +1,15 @@
 var expect = require('expect.js');
 
 describe('PathFilter', function() {
+  var subject = require('../lib/pathfilter'),
+      url_config;
+
+  beforeEach(function() {
+    url_config = {};
+    url_config.protected_by_default = true;
+  });
+
   describe('#getPathFilter', function() {
-    var subject = require('../lib/pathfilter'),
-        url_config;
-
-    beforeEach(function() {
-      url_config = {};
-      url_config.protected_by_default = true;
-    });
-
     describe('protected_by_default is true', function() {
       beforeEach(function() {
         url_config.protected_by_default = true;
@@ -160,6 +160,70 @@ describe('PathFilter', function() {
         // Assert
         expect(result).to.eql(url_config.path_filters[0]);
       });
+    });
+  });
+
+  describe('resolve', function() {
+    it('skips a path component when matching a URL', function() {
+      // Arrange
+      var url = 'http://localhost:8000/one/foo/bar';
+      var path_filter = '{1}/fizz/buzz';
+      var expected = 'http://localhost:8000/one/fizz/buzz';
+
+      // Act
+      var result = subject.resolve(url, path_filter);
+
+      // Assert
+      expect(result).to.equal(expected);
+    });
+
+    it('ignores query string parameters', function() {
+      // Arrange
+      var url = 'http://localhost:8000/one/foo/bar?one=two';
+      var path_filter = '{1}/fizz/buzz';
+      var expected = 'http://localhost:8000/one/fizz/buzz?one=two';
+
+      // Act
+      var result = subject.resolve(url, path_filter);
+
+      // Assert
+      expect(result).to.equal(expected);
+    });
+
+    it('includes multiple components', function() {
+      // Arrange
+      var url = 'http://localhost:8000/one/two/three/foo/bar?one=two';
+      var path_filter = '{3}/fizz/buzz';
+      var expected = 'http://localhost:8000/one/two/three/fizz/buzz?one=two';
+
+      // Act
+      var result = subject.resolve(url, path_filter);
+
+      // Assert
+      expect(result).to.equal(expected);
+    });
+
+    it('includes all components when the path filter specifies more components than are in the URL', function() {
+      // Arrange
+      var url = 'http://localhost:8000/bar?one=two';
+      var path_filter = '{3}/fizz/buzz';
+      var expected = 'http://localhost:8000/bar/fizz/buzz?one=two';
+
+      // Act
+      var result = subject.resolve(url, path_filter);
+
+      // Assert
+      expect(result).to.equal(expected);
+    });
+
+    it('throws an error if the path filter is invalid', function() {
+      // Arrange
+      var url = 'http://localhost:8000/bar?one=two';
+      var path_filter = '{-3}/fizz/buzz';
+
+      // Act
+      // Assert
+      expect(function() { subject.resolve(url, path_filter); }).to.throwError();
     });
   });
 });
