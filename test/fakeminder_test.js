@@ -13,10 +13,12 @@ describe('FakeMinder', function() {
       emptySession,
       request,
       response,
-      log_stub = sinon.stub(log);
+      log_stub = sinon.stub(log),
+      sample_target_url;
 
   beforeEach(function() {
     subject = new FakeMinder('config.json', log_stub);
+    sample_target_url = subject.config.upstreamApp('sample_target').proxy_pass;
     emptySession = { 'user':'' };
     request = {};
     response = {};
@@ -28,7 +30,7 @@ describe('FakeMinder', function() {
     };
     // Stubs for supporting cookie.js
     request['connection'] = { 'encrypted':false };
-    request['headers'] = {};
+    request['headers'] = { host: 'localhost:8000' };
     response['headers'] = {};
     response['getHeader'] = function(header) {
       this.headers = this.headers || {};
@@ -326,12 +328,14 @@ describe('FakeMinder', function() {
     describe('and there is no current session', function() {
       it('redirects the user to the not_authenticated URL', function() {
         // Arrange
+        var expected_location = sample_target_url + getTargetSiteUrl('not_authenticated');
+
         // Act
         subject.protected(request, response, function() {});
 
         // Assert
         expect(response.statusCode).to.be(302);
-        expect(response.headers['Location']).to.be(getTargetSiteUrl('not_authenticated'));
+        expect(response.headers['Location']).to.equal(expected_location);
       });
 
       describe('and the not_authenticated URL is not defined', function() {
@@ -411,12 +415,14 @@ describe('FakeMinder', function() {
 
       it('redirects the user-agent to the not_authenticated URL', function() {
         // Arrange
+        var expected_location = sample_target_url + getTargetSiteUrl('not_authenticated');
+
         // Act
         subject.protected(request, response, function() {});
 
         // Assert
         expect(response.statusCode).to.be(302);
-        expect(response.headers['Location']).to.be(getTargetSiteUrl('not_authenticated'));
+        expect(response.headers['Location']).to.equal(expected_location);
       });
 
       describe('and the not_authenticated URL is not defined', function() {
@@ -460,6 +466,7 @@ describe('FakeMinder', function() {
       describe('and the user associated with the FORMCRED is currently locked', function() {
         it('responds with a redirect to the account locked URI', function() {
           // Arrange
+          var expected_location = 'http://localhost:8000' + getTargetSiteUrl('account_locked');
           subject.config.users()[0].locked = true;
 
           // Act
@@ -467,7 +474,7 @@ describe('FakeMinder', function() {
 
           // Assert
           expect(response.statusCode).to.be(302);
-          expect(response.headers['Location']).to.be(getTargetSiteUrl('account_locked'));
+          expect(response.headers['Location']).to.equal(expected_location);
         });
 
         describe('and the account_locked redirect URI is not defined', function() {
@@ -602,12 +609,14 @@ describe('FakeMinder', function() {
 
       it('responds with a redirect to the bad login URI', function() {
         // Arrange
+        var expected_location = sample_target_url + getTargetSiteUrl('bad_login');
+
         // Act
         subject.protected(request, response, function() {});
 
         // Assert
         expect(response.statusCode).to.be(302);
-        expect(response.headers['Location']).to.be(getTargetSiteUrl('bad_login'));
+        expect(response.headers['Location']).to.equal(expected_location);
       });
 
       describe('and the bad_login redirect URI is not defined', function() {
@@ -651,13 +660,14 @@ describe('FakeMinder', function() {
 
       it('responds with a redirect to the bad password URI', function() {
         // Arrange
+        var expected_location = sample_target_url + getTargetSiteUrl('bad_password');
 
         // Act
         subject.protected(request, response, function() {});
 
         // Assert
         expect(response.statusCode).to.be(302);
-        expect(response.headers['Location']).to.be(getTargetSiteUrl('bad_password'));
+        expect(response.headers['Location']).to.equal(expected_location);
       });
 
       describe('and the bad_password redirect URI is not defined', function() {
@@ -700,6 +710,7 @@ describe('FakeMinder', function() {
       describe('and the user\'s account is locked', function() {
         it('responds with a redirect to the account locked URI', function() {
           // Arrange
+          var expected_location = sample_target_url + getTargetSiteUrl('account_locked');
           subject.config.users()[0].locked = true;
 
           // Act
@@ -707,7 +718,7 @@ describe('FakeMinder', function() {
 
           // Assert
           expect(response.statusCode).to.be(302);
-          expect(response.headers['Location']).to.be(getTargetSiteUrl('account_locked'));
+          expect(response.headers['Location']).to.equal(expected_location);
         });
 
         describe('and the account_locked redirect URI is not defined', function() {
@@ -760,6 +771,20 @@ describe('FakeMinder', function() {
         // Assert
         expect(subject.formcred).to.not.have.key(formcred.formcred_id);
       });
+    });
+
+    it('redirects using a path filter to reuse the top level path of the target URL', function() {
+      // Arrange
+      request.url = '/keep_this_folder/protected';
+      subject.config._config.upstreamApps['sample_target'].path_filters[0].url = '/keep_this_folder/protected';
+      subject.config._config.upstreamApps['sample_target'].not_authenticated = '{1}/system/error/notauthenticated';
+      var expected = 'http://localhost:8000/keep_this_folder/system/error/notauthenticated';
+
+      // Act
+      subject.protected(request, response, function() {});
+
+      // Assert
+      expect(response.headers['Location']).to.be(expected);
     });
   });
 
