@@ -92,6 +92,28 @@ describe('PathFilter', function() {
       expect(result).to.eql(url_config.path_filters[0]);
     });
 
+    it('ignores query string values', function() {
+      // Arrange
+      url_config.path_filters = [{ url: '/abc/123/', protected: false }];
+
+      // Act
+      var result = subject.getPathFilter(url_config, '/abc/123?foo=bar');
+
+      // Assert
+      expect(result).to.eql(url_config.path_filters[0]);
+    });
+
+    it('ignores fragments', function() {
+      // Arrange
+      url_config.path_filters = [{ url: '/abc/123/', protected: false }];
+
+      // Act
+      var result = subject.getPathFilter(url_config, '/abc/123#foo');
+
+      // Assert
+      expect(result).to.eql(url_config.path_filters[0]);
+    });
+
     describe('wildcard support', function() {
       it('matches against a leading wildcard', function() {
         // Arrange
