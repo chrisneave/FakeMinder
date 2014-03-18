@@ -9,7 +9,8 @@ module.exports = function(grunt) {
         'bin/fakeminder',
         'test/**/*.js',
         'sample_target/app.js',
-        'sample_target/routes/*.js'
+        'sample_target/routes/*.js',
+        'sample_target/test/**/*.js'
       ],
       options: {
         curly: true,

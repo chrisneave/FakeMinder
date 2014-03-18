@@ -1,228 +1,94 @@
-var upstreamApp = { url: 'http://localhost:8000', logoff: '/system/logout' };
-var logon_url = '/public/logon';
-var protected_url = '/protected';
-var logoff_url = upstreamApp.logoff;
+var expect = require('expect.js');
+var request = require('request');
 
-/*
- * Homepage
- */
-casper.test.begin('Verify homepage', 4, function suite(test) {
-  casper.start(upstreamApp.url, function() {
-    test.assertHttpStatus(200);
-    test.assertExists('a[href="' + upstreamApp.logoff + '"]', 'Has a link to the logoff page');
-    test.assertExists('a[href="' + protected_url + '"]', 'Has a link to the protected folder');
-    test.assertExists('a[href="' + logon_url + '"]', 'Has a link to the login page');
+describe('SampleTarget', function() {
+  var base_url = 'http://localhost:8000';
+  var logon_url = base_url + '/public/siteminderagent/login.fcc';
+  var protected_url = base_url + '/protected';
+  var logoff_url = base_url + '/system/logout';
+  var options = {};
+
+  beforeEach(function() {
+    options.followAllRedirects = true;
+    options.maxRedirects = 3;
+    options.jar = true;
+    options.form = {};
   });
 
-  casper.run(function() {
-    test.done();
-  });
-});
+  describe('Login', function() {
+    beforeEach(function() {
+      options.url = logon_url;
+      options.form.TARGET = protected_url;
+    });
 
-/*
- * Logoff page
- */
-casper.test.begin('Verify logoff page', 3, function suite(test) {
-  casper.start(upstreamApp.url);
+    describe('with valid credentials', function() {
+      beforeEach(function() {
+        options.form.USERNAME = 'bob';
+        options.form.PASSWORD = 'test1234';
+      });
 
-  casper.then(function() {
-    this.click('a[href="' + upstreamApp.logoff + '"]');
-  });
+      it('is redirected to the target URL', function(done) {
+        request.post(options, function(err, res, body) {
+          expect(res.statusCode).to.equal(200);
+          expect(res.request.uri.href).to.equal(protected_url);
+          done();
+        });
+      });
+    });
 
-  casper.then(function() {
-    test.assertHttpStatus(200);
-    test.assertTitle('Logoff');
-    test.assertTextExists('Your are now logged off. Have a nice day!');
-  });
+    describe('with a bad username', function() {
+      beforeEach(function() {
+        options.form.USERNAME = 'bob1';
+        options.form.PASSWORD = 'test1234';
+      });
 
-  casper.run(function() {
-    test.done();
-  });
-});
+      it('is redirected to the bad login page', function(done) {
+        request.post(options, function(err, res, body) {
+          expect(res.statusCode).to.equal(200);
+          expect(res.request.uri.href).to.equal(base_url + '/system/error/badlogin');
+          done();
+        });
+      });
+    });
 
-/*
- * Protected page
- */
-casper.test.begin('Verify protected page', 3, function suite(test) {
-  casper.start(upstreamApp.url);
+    describe('with a bad password', function() {
+      beforeEach(function() {
+        options.form.USERNAME = 'bob';
+        options.form.PASSWORD = 'test12341212';
+      });
 
-  casper.then(function() {
-    this.click('a[href="' + protected_url + '"]');
-  });
+      it('is redirected to the bad login page', function(done) {
+        request.post(options, function(err, res, body) {
+          expect(res.statusCode).to.equal(200);
+          expect(res.request.uri.href).to.equal(base_url + '/system/error/badpassword');
+          done();
+        });
+      });
+    });
 
-  casper.then(function() {
-    test.assertHttpStatus(200);
-    test.assertTitle('Not authenticated');
-    test.assertTextExists('Your are not authenticated. Please login before accessing this resource.');
-  });
+    describe('with bad credentials three times', function() {
+      beforeEach(function() {
+        options.form.USERNAME = 'bob';
+        options.form.PASSWORD = 'test12341212';
+      });
 
-  casper.run(function() {
-    test.done();
-  });
-});
+      it('is redirected to the account locked page', function(done) {
+        var count = 0;
 
-/*
- * Login page
- */
-casper.test.begin('Verify login page', 4, function suite(test) {
-  casper.start(upstreamApp.url);
+        var callback = function(err, res, body) {
+          count++;
 
-  casper.then(function() {
-    this.click('a[href="' + logon_url + '"]');
-  });
+          if (count > 2) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.request.uri.href).to.equal(base_url + '/system/error/accountlocked');
+            return done();
+          }
 
-  casper.then(function() {
-    test.assertHttpStatus(200);
-    test.assertTitle('Login');
-    test.assertTextExists('Please enter your username and password then click Login.');
-    test.assertExists('input#TARGET[value="' + protected_url + '"]')
-  });
+          request.post(options, callback);
+        };
 
-  casper.run(function() {
-    test.done();
-  });
-});
-
-/*
- * Login with valid credentials
- */
-casper.test.begin('Login with valid credentials', 6, function suite(test) {
-  casper.start(upstreamApp.url + logon_url);
-
-  casper.then(function() {
-    this.fill('form#logonform', {
-      'USERNAME': 'bob',
-      'PASSWORD': 'test1234',
-      'TARGET': protected_url
-    }, true);
-  });
-
-  casper.then(function() {
-    test.assertHttpStatus(200);
-    test.assertTitle('Protected');
-    test.assertTextExists('client-id');
-    test.assertTextExists('cid123');
-    test.assertTextExists('user-id');
-    test.assertTextExists('uid456');
-  });
-
-  casper.thenOpen(logoff_url);
-
-  casper.run(function() {
-    test.done();
-  });
-});
-
-/*
- * Login with an invalid user ID
- */
-casper.test.begin('Login with an invalid user ID', 2, function suite(test) {
-  casper.start(upstreamApp.url + logon_url);
-
-  casper.then(function() {
-    this.fill('form#logonform', {
-      'USERNAME': 'bob111',
-      'PASSWORD': 'test1234',
-      'TARGET': protected_url
-    }, true);
-  });
-
-  casper.then(function() {
-    test.assertHttpStatus(200);
-    test.assertTitle('Bad Login');
-  });
-
-  casper.run(function() {
-    test.done();
-  });
-});
-
-/*
- * Login with an invalid password
- */
-casper.test.begin('Login with an invalid password', 2, function suite(test) {
-  casper.start(upstreamApp.url + logon_url);
-
-  casper.then(function() {
-    this.fill('form#logonform', {
-      'USERNAME': 'bob',
-      'PASSWORD': 'test12345',
-      'TARGET': protected_url
-    }, true);
-  });
-
-  casper.then(function() {
-    test.assertHttpStatus(200);
-    test.assertTitle('Bad Password');
-  });
-
-  casper.run(function() {
-    test.done();
-  });
-});
-
-/*
- * Lockout account
- */
-casper.test.begin('View the account lockout page after three login attempts', 7, function suite(test) {
-  casper.start(upstreamApp.url + logon_url);
-
-  // Logon successfully first to ensure the number of logon attempts is reset to zero.
-  casper.then(function() {
-    this.fill('form#logonform', {
-      'USERNAME': 'bob',
-      'PASSWORD': 'test1234',
-      'TARGET': protected_url
-    }, true);
-  });
-
-  casper.thenOpen(upstreamApp.url + logon_url);
-
-  casper.then(function() {
-    this.fill('form#logonform', {
-      'USERNAME': 'bob',
-      'PASSWORD': 'test12345',
-      'TARGET': protected_url
-    }, true);
-  });
-
-  casper.then(function() {
-    test.assertHttpStatus(200);
-    test.assertTitle('Bad Password');
-  });
-
-  casper.thenOpen(upstreamApp.url + logon_url);
-
-  casper.then(function() {
-    this.fill('form#logonform', {
-      'USERNAME': 'bob',
-      'PASSWORD': 'test12345',
-      'TARGET': protected_url
-    }, true);
-  });
-
-  casper.then(function() {
-    test.assertHttpStatus(200);
-    test.assertTitle('Bad Password');
-  });
-
-  casper.thenOpen(upstreamApp.url + logon_url);
-
-  casper.then(function() {
-    this.fill('form#logonform', {
-      'USERNAME': 'bob',
-      'PASSWORD': 'test12345',
-      'TARGET': protected_url
-    }, true);
-  });
-
-  casper.then(function() {
-    test.assertHttpStatus(200);
-    test.assertTitle('Account Locked');
-    test.assertTextExists('Your account has been locked.');
-  });
-
-  casper.run(function() {
-    test.done();
+        request.post(options, callback);
+      });
+    });
   });
 });
