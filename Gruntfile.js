@@ -52,7 +52,7 @@ module.exports = function(grunt) {
     },
     casperjs: {
       options: {},
-      files: {src: ['sample_target/test/**/*.js']}
+      files: {src: ['sample_target/integration_test/**/*.js']}
     },
     express: {
       options: {
