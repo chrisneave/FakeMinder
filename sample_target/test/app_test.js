@@ -6,16 +6,19 @@ describe('SampleTarget', function() {
   var logon_url = base_url + '/public/siteminderagent/login.fcc';
   var protected_url = base_url + '/protected';
   var logoff_url = base_url + '/system/logout';
+  var not_authenticated_url = base_url + '/system/error/notauthenticated';
   var options = {};
 
   beforeEach(function() {
-    options.followAllRedirects = true;
-    options.maxRedirects = 3;
-    options.jar = true;
-    options.form = {};
+    options = {
+      followAllRedirects: true,
+      maxRedirects: 3,
+      jar: request.jar(),
+      form: {}
+    };
   });
 
-  describe('Login', function() {
+  describe('POST /public/siteminderagent/login.fcc', function() {
     beforeEach(function() {
       options.url = logon_url;
       options.form.TARGET = protected_url;
@@ -88,6 +91,23 @@ describe('SampleTarget', function() {
         };
 
         request.post(options, callback);
+      });
+    });
+  });
+
+  describe('GET /protected', function() {
+    beforeEach(function() {
+      options.url = protected_url;
+      options.form = {};
+    });
+
+    describe('without a valid session', function() {
+      it('is redirected to the not authenticated URL', function(done) {
+        request.get(options, function(err, res, body) {
+          expect(res.statusCode).to.equal(200);
+          expect(res.request.uri.href).to.equal(not_authenticated_url);
+          done();
+        });
       });
     });
   });
