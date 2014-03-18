@@ -45,6 +45,15 @@ module.exports = function(grunt) {
           ignoreLeaks: false,
           reporter: 'dot'
         }
+      },
+      integration_test: {
+        src: ['sample_target/test/**/*.js'],
+        options: {
+          globals: ['expect', 'require'],
+          timeout: 2000,
+          ignoreLeaks: false,
+          reporter: 'spec'
+        }
       }
     },
     watch: {
@@ -115,7 +124,7 @@ module.exports = function(grunt) {
     grunt.task.run('clear');
     grunt.task.run('fakeminder-start');
     grunt.task.run('express:sample_target');
-    grunt.task.run('casperjs');
+    grunt.task.run('simplemocha:integration_test');
     grunt.task.run('express:sample_target:stop');
     grunt.task.run('fakeminder-stop');
   });
@@ -140,9 +149,6 @@ module.exports = function(grunt) {
         done();
       }
     });
-
-    server.stdout.pipe(process.stdout);
-    server.stderr.pipe(process.stderr);
   });
 
   // End the FakeMinder server

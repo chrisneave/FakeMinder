@@ -41,7 +41,6 @@ app.set('port', upstreamApp.port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.favicon());
-app.use(express.logger('dev'));
 app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(app.router);
