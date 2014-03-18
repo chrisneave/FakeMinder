@@ -128,6 +128,17 @@ module.exports = function(grunt) {
     grunt.task.run('express:sample_target:stop');
     grunt.task.run('fakeminder-stop');
   });
+  grunt.registerTask('ui-test', 'Execute Casperjs integration tests against the sample app through the proxy', function() {
+    // Make sure failed automation tests don't break the entire task
+    // so we can shutdown both the FakeMinder and Express apps.
+    grunt.option('force', true);
+    grunt.task.run('clear');
+    grunt.task.run('fakeminder-start');
+    grunt.task.run('express:sample_target');
+    grunt.task.run('casperjs');
+    grunt.task.run('express:sample_target:stop');
+    grunt.task.run('fakeminder-stop');
+  });
   grunt.registerTask('cover', ['clear', 'clean', 'istanbul', 'open:cover']);
   grunt.registerTask('cover-check', ['clear', 'clean', 'istanbul', 'coverage']);
 
