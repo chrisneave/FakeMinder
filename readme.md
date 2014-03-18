@@ -76,9 +76,13 @@ Both analysis using JSHint and the execution of unit tests are executed using th
 
 `grunt`
 
-Integration tests are executed using PhantomJS and CasperJS. Execute the corresponding grunt task to run them:
+Integration tests are executed using mocha and require. Execute the corresponding grunt task to run them:
 
 `grunt int-test`
+
+Browser based integration tests are run using CasperJS and PhantomJS. Execute them using the following grunt task:
+
+`grunt ui-test`
 
 ## Code Coverage
 
