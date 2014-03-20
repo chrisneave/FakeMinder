@@ -26,7 +26,7 @@ describe('SampleTarget', function() {
 
     describe('with valid credentials', function() {
       beforeEach(function() {
-        options.form.USERNAME = 'bob';
+        options.form.USER = 'bob';
         options.form.PASSWORD = 'test1234';
       });
 
@@ -41,7 +41,7 @@ describe('SampleTarget', function() {
 
     describe('with a bad username', function() {
       beforeEach(function() {
-        options.form.USERNAME = 'bob1';
+        options.form.USER = 'bob1';
         options.form.PASSWORD = 'test1234';
       });
 
@@ -56,7 +56,7 @@ describe('SampleTarget', function() {
 
     describe('with a bad password', function() {
       beforeEach(function() {
-        options.form.USERNAME = 'bob';
+        options.form.USER = 'bob';
         options.form.PASSWORD = 'test12341212';
       });
 
@@ -71,7 +71,7 @@ describe('SampleTarget', function() {
 
     describe('with bad credentials three times', function() {
       beforeEach(function() {
-        options.form.USERNAME = 'bob';
+        options.form.USER = 'bob';
         options.form.PASSWORD = 'test12341212';
       });
 

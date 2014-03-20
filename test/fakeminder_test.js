@@ -128,7 +128,7 @@ describe('FakeMinder', function() {
       request.url = subject.config.siteminder().login_fcc;
       request.method = 'POST';
       user = 'bob';
-      post_data = 'USERNAME=' + user + '&PASSWORD=test1234&TARGET=' + target;
+      post_data = 'USER=' + user + '&PASSWORD=test1234&TARGET=' + target;
       request.on = function(event, callback) {
         if (event === 'data') {
           callback(post_data);
@@ -161,7 +161,7 @@ describe('FakeMinder', function() {
         it('returns a 400 response', function(done) {
           // Arrange
           subject.config.siteminder.smagentname = "custom_agent";
-          post_data = 'USERNAME=' + user + '&PASSWORD=test1234&TARGET=' + target + "&SMAGENTNAME=blah";
+          post_data = 'USER=' + user + '&PASSWORD=test1234&TARGET=' + target + "&SMAGENTNAME=blah";
 
           // Act
           subject.logon(request, response, undefined, function() {
@@ -177,7 +177,7 @@ describe('FakeMinder', function() {
         it('returns a 400 response', function(done) {
           // Arrange
           subject.config.siteminder.smagentname = "custom_agent";
-          post_data = 'USERNAME=' + user + '&PASSWORD=test1234&TARGET=' + target;
+          post_data = 'USER=' + user + '&PASSWORD=test1234&TARGET=' + target;
 
           // Act
           subject.logon(request, response, undefined, function() {
@@ -190,7 +190,7 @@ describe('FakeMinder', function() {
       });
     });
 
-    describe('and the USERNAME and PASSWORD are valid', function() {
+    describe('and the USER and PASSWORD are valid', function() {
       it('sets a FORMCRED cookie that maps to a good login attempt', function(done) {
         // Arrange
         // Act
@@ -244,10 +244,10 @@ describe('FakeMinder', function() {
       });
     });
 
-    describe('and the USERNAME is not valid', function() {
+    describe('and the USER is not valid', function() {
       it('sets a FORMCRED cookie that maps to a bad login attempt', function(done) {
         // Arrange
-        post_data = 'USERNAME=fred&PASSWORD=test1234&TARGET=' + target;
+        post_data = 'USER=fred&PASSWORD=test1234&TARGET=' + target;
 
         // Act
         subject.logon(request, response, undefined, function() {
@@ -276,7 +276,7 @@ describe('FakeMinder', function() {
     describe('and the PASSWORD is not valid', function() {
       it('sets a FORMCRED cookie that maps to a bad password attempt', function(done) {
         // Arrange
-        post_data = 'USERNAME=' + user + '&PASSWORD=foobar1&TARGET=' + target;
+        post_data = 'USER=' + user + '&PASSWORD=foobar1&TARGET=' + target;
 
         // Act
         subject.logon(request, response, undefined, function() {
