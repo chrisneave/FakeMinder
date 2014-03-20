@@ -37,7 +37,7 @@ module.exports = function(grunt) {
       }
     },
     simplemocha: {
-      all: {
+      unit_test: {
         src: ['test/**/*.js'],
         options: {
           globals: ['expect'],
@@ -115,8 +115,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-open');
 
   // Default task.
-  grunt.registerTask('default', ['clear', 'jshint', 'simplemocha']);
-  grunt.registerTask('test', ['clear', 'simplemocha']);
+  grunt.registerTask('default', ['clear', 'jshint', 'simplemocha:unit_test']);
+  grunt.registerTask('test', ['clear', 'simplemocha:unit_test']);
   grunt.registerTask('int-test', 'Execute integration tests against the sample app through the proxy', function() {
     // Make sure failed automation tests don't break the entire task
     // so we can shutdown both the FakeMinder and Express apps.
