@@ -18,7 +18,11 @@ describe('FakeMinder', function() {
 
   beforeEach(function() {
     subject = new FakeMinder('config.json', log_stub);
-    sample_target_url = subject.config.upstreamApp('sample_target').proxy_pass;
+    sample_target_url = url.format({
+        protocol: 'http:',
+        hostname: subject.config.upstreamApp('sample_target').hostname,
+        port: subject.config.proxy().port
+    });
     emptySession = { 'user':'' };
     request = {};
     response = {};
