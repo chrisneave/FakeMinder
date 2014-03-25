@@ -18,7 +18,6 @@
 	},
   "upstreamApps": {
     "sample_target": {
-      "proxy_pass": "http://localhost:8000",
       "hostname": "localhost",
       "port": 4567,
       "logoff": "/system/logout",
