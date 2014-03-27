@@ -207,6 +207,19 @@ describe('FakeMinder', function() {
         });
       });
 
+      it('sets a FORMCRED cookie using the configured domain', function(done) {
+        // Arrange
+        subject.config._config.siteminder.formcred_cookie_domain = 'foo.bar.com';
+
+        // Act
+        subject.logon(request, response, undefined, function() {
+          // Assert
+          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          expect(cookies.domain).to.equal('foo.bar.com');
+          done();
+        });
+      });
+
       it('creates a new FORMCRED that maps to the user', function(done) {
         // Arrange
         var expected = _.findWhere(subject.config.users(), {'name': user});
@@ -263,6 +276,20 @@ describe('FakeMinder', function() {
         });
       });
 
+      it('sets a FORMCRED cookie using the configured domain', function(done) {
+        // Arrange
+        post_data = 'USER=fred&PASSWORD=test1234&TARGET=' + target;
+        subject.config._config.siteminder.formcred_cookie_domain = 'foo.bar.com';
+
+        // Act
+        subject.logon(request, response, undefined, function() {
+          // Assert
+          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          expect(cookies.domain).to.equal('foo.bar.com');
+          done();
+        });
+      });
+
       it('adds the full request URL to the FORMCRED', function() {
         // Arrange
         var expected = target;
@@ -288,6 +315,20 @@ describe('FakeMinder', function() {
           var cookies = cookie.parse(response.headers['set-cookie'][0]);
           var formcred_id = cookies[subject.FORMCRED_COOKIE];
           expect(subject.formcred[formcred_id].status).to.equal(Model.FormCredStatus.bad_password);
+          done();
+        });
+      });
+
+      it('sets a FORMCRED cookie using the configured domain', function(done) {
+        // Arrange
+        post_data = 'USER=' + user + '&PASSWORD=foobar1&TARGET=' + target;
+        subject.config._config.siteminder.formcred_cookie_domain = 'foo.bar.com';
+
+        // Act
+        subject.logon(request, response, undefined, function() {
+          // Assert
+          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          expect(cookies.domain).to.equal('foo.bar.com');
           done();
         });
       });
@@ -877,6 +918,24 @@ describe('FakeMinder', function() {
 
         // Assert
         expect(cookies[0]).to.contain('SMSESSION=' + session.session_id);
+        done();
+      });
+    });
+
+    it('sets the SMSESSION cookie using the configured domain', function(done) {
+      // Arrange
+      var session = new Model.Session({'user': new Model.User({'name': 'bob'})});
+      subject.sessions[session.session_id] = session;
+      request.fm_session = session;
+      subject.config._config.siteminder.sm_cookie_domain = 'fizz.buzz.com';
+
+      // Act
+      subject.end(request, response, function() {
+        // Assert
+        var cookies = cookie.parse(response.headers['set-cookie'][0]);
+
+        // Assert
+        expect(cookies.domain).to.equal('fizz.buzz.com');
         done();
       });
     });

@@ -20,7 +20,9 @@ describe('Config', function() {
       },
       siteminder: {
         sm_cookie: 'SMSESSION',
+        sm_cookie_domain: 'fizz.buzz.com',
         formcred_cookie: 'FORMCRED',
+        formcred_cookie_domain: 'foo.bar.com',
         userid_field: 'USERNAME',
         password_field: 'PASSWORD',
         target_field: 'TARGET',
