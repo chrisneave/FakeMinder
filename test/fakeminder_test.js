@@ -143,6 +143,22 @@ describe('FakeMinder', function() {
       };
     });
 
+    it('does not use a case sensitive comparison of form fields', function() {
+      // Arrange
+      var cookies,
+          formcred_id;
+      post_data = 'user=' + user + '&password=test1234&target=' + target;
+
+      // Act
+      subject.logon(request, response, undefined, function() {});
+
+      // Assert
+      cookies = cookie.parse(response.headers['set-cookie'][0]);
+      formcred_id = cookies[subject.FORMCRED_COOKIE];
+      expect(subject.formcred[formcred_id].status).to.equal(Model.FormCredStatus.good_login);
+      expect(subject.formcred[formcred_id].target_url).to.equal(target);
+    });
+
     describe('and the target URI belongs to the site being proxied', function() {
       it('redirects to the URI specified by the target URI', function(done) {
         // Arrange
