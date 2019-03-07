@@ -42,6 +42,10 @@ This software is in no way affiliated with or intends to be a representation of 
 
 It is preferable to install the package to your global store so you can use the command line interface.
 
+If you are installing from the source repository then run the following from the root folder of the project repository.
+
+`npm install`
+
 ## Usage
 
 ### Viewing help
