@@ -153,7 +153,7 @@ describe('FakeMinder', function() {
       subject.logon(request, response, undefined, function() {});
 
       // Assert
-      cookies = cookie.parse(response.headers['set-cookie'][0]);
+      cookies = cookie.parse(response.headers['Set-Cookie'][0]);
       formcred_id = cookies[subject.FORMCRED_COOKIE];
       expect(subject.formcred[formcred_id].status).to.equal(Model.FormCredStatus.good_login);
       expect(subject.formcred[formcred_id].target_url).to.equal(target);
@@ -216,7 +216,7 @@ describe('FakeMinder', function() {
         // Act
         subject.logon(request, response, undefined, function() {
           // Assert
-          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          var cookies = cookie.parse(response.headers['Set-Cookie'][0]);
           var formcred_id = cookies[subject.FORMCRED_COOKIE];
           expect(subject.formcred[formcred_id].status).to.equal(Model.FormCredStatus.good_login);
           done();
@@ -230,7 +230,7 @@ describe('FakeMinder', function() {
         // Act
         subject.logon(request, response, undefined, function() {
           // Assert
-          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          var cookies = cookie.parse(response.headers['Set-Cookie'][0]);
           expect(cookies.domain).to.equal('foo.bar.com');
           done();
         });
@@ -243,7 +243,7 @@ describe('FakeMinder', function() {
         // Act
         subject.logon(request, response, undefined, function() {
           // Assert
-          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          var cookies = cookie.parse(response.headers['Set-Cookie'][0]);
           var formcred_id = cookies[subject.FORMCRED_COOKIE];
           expect(subject.formcred[formcred_id].user).to.equal(expected);
           done();
@@ -258,7 +258,7 @@ describe('FakeMinder', function() {
         subject.logon(request, response, undefined, function() {});
 
         // Assert
-        var cookies = cookie.parse(response.headers['set-cookie'][0]);
+        var cookies = cookie.parse(response.headers['Set-Cookie'][0]);
         var formcred_id = cookies[subject.FORMCRED_COOKIE];
         expect(subject.formcred[formcred_id].target_url).to.equal(expected);
       });
@@ -285,7 +285,7 @@ describe('FakeMinder', function() {
         // Act
         subject.logon(request, response, undefined, function() {
           // Assert
-          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          var cookies = cookie.parse(response.headers['Set-Cookie'][0]);
           var formcred_id = cookies[subject.FORMCRED_COOKIE];
           expect(subject.formcred[formcred_id].status).to.equal(Model.FormCredStatus.bad_login);
           done();
@@ -300,7 +300,7 @@ describe('FakeMinder', function() {
         // Act
         subject.logon(request, response, undefined, function() {
           // Assert
-          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          var cookies = cookie.parse(response.headers['Set-Cookie'][0]);
           expect(cookies.domain).to.equal('foo.bar.com');
           done();
         });
@@ -314,7 +314,7 @@ describe('FakeMinder', function() {
         subject.logon(request, response, undefined, function() {});
 
         // Assert
-        var cookies = cookie.parse(response.headers['set-cookie'][0]);
+        var cookies = cookie.parse(response.headers['Set-Cookie'][0]);
         var formcred_id = cookies[subject.FORMCRED_COOKIE];
         expect(subject.formcred[formcred_id].target_url).to.equal(expected);
       });
@@ -328,7 +328,7 @@ describe('FakeMinder', function() {
         // Act
         subject.logon(request, response, undefined, function() {
           // Assert
-          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          var cookies = cookie.parse(response.headers['Set-Cookie'][0]);
           var formcred_id = cookies[subject.FORMCRED_COOKIE];
           expect(subject.formcred[formcred_id].status).to.equal(Model.FormCredStatus.bad_password);
           done();
@@ -343,7 +343,7 @@ describe('FakeMinder', function() {
         // Act
         subject.logon(request, response, undefined, function() {
           // Assert
-          var cookies = cookie.parse(response.headers['set-cookie'][0]);
+          var cookies = cookie.parse(response.headers['Set-Cookie'][0]);
           expect(cookies.domain).to.equal('foo.bar.com');
           done();
         });
@@ -357,7 +357,7 @@ describe('FakeMinder', function() {
         subject.logon(request, response, undefined, function() {});
 
         // Assert
-        var cookies = cookie.parse(response.headers['set-cookie'][0]);
+        var cookies = cookie.parse(response.headers['Set-Cookie'][0]);
         var formcred_id = cookies[subject.FORMCRED_COOKIE];
         expect(subject.formcred[formcred_id].target_url).to.equal(expected);
       });
@@ -857,7 +857,7 @@ describe('FakeMinder', function() {
 
         // Act
         subject.logoff(request, response, function() {
-          var cookies = response.headers['set-cookie'];
+          var cookies = response.headers['Set-Cookie'];
 
           // Assert
           expect(cookies[0]).to.contain('SMSESSION=LOGGEDOFF');
@@ -930,7 +930,7 @@ describe('FakeMinder', function() {
       // Act
       subject.end(request, response, function() {
         // Assert
-        var cookies = response.headers['set-cookie'];
+        var cookies = response.headers['Set-Cookie'];
 
         // Assert
         expect(cookies[0]).to.contain('SMSESSION=' + session.session_id);
@@ -948,7 +948,7 @@ describe('FakeMinder', function() {
       // Act
       subject.end(request, response, function() {
         // Assert
-        var cookies = cookie.parse(response.headers['set-cookie'][0]);
+        var cookies = cookie.parse(response.headers['Set-Cookie'][0]);
 
         // Assert
         expect(cookies.domain).to.equal('fizz.buzz.com');
