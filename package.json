@@ -5,6 +5,9 @@
   "bin": {
     "fakeminder": "bin/fakeminder"
   },
+  "scripts": {
+    "release": "standard-version"
+  },
   "preferGlobal": true,
   "repository": {
     "type": "git",
@@ -29,22 +32,23 @@
     "npmlog": "0.0.6"
   },
   "devDependencies": {
-    "mocha": "1.x",
-    "expect.js": "0.x",
     "cookie": "0.x",
+    "expect.js": "0.x",
     "grunt": "~0.4.2",
     "grunt-casperjs": "~1.4.0",
     "grunt-clear": "~0.2.1",
+    "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-jshint": "~0.7.2",
+    "grunt-contrib-watch": "~0.5.3",
     "grunt-express-server": "~0.4.9",
     "grunt-git": "~0.2.2",
-    "grunt-simple-mocha": "~0.4.0",
-    "grunt-contrib-watch": "~0.5.3",
-    "grunt-contrib-clean": "~0.5.0",
     "grunt-istanbul-coverage": "0.0.2",
-    "istanbul": "~0.1.46",
     "grunt-open": "~0.2.2",
+    "grunt-simple-mocha": "~0.4.0",
+    "istanbul": "~0.1.46",
+    "mocha": "1.x",
+    "request": "~2.34.0",
     "sinon": "~1.8.2",
-    "request": "~2.34.0"
+    "standard-version": "^5.0.1"
   }
 }
