@@ -62,7 +62,7 @@ or
 
 Start an instance of the server using:
 
-`fakeminder start <config_file>`
+`fakeminder start -c <config_file>`
 
 Where `<config_file>` is the configuration file to use. Defaults to using the config.json in the project root folder.
 
