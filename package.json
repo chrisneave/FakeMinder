@@ -1,6 +1,6 @@
 {
   "name": "fakeminder",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Fake or mock implementation of CA SiteMinder to use for developer testing",
   "bin": {
     "fakeminder": "bin/fakeminder"
