@@ -22,7 +22,7 @@
     "url": "https://github.com/chrisneave/fakeminder/issues"
   },
   "dependencies": {
-    "http-proxy": "0.10.x",
+    "http-proxy": "1.18.x",
     "cookies": "0.3.x",
     "express": "3.x",
     "ejs": "0.8.x",
